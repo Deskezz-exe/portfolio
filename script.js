@@ -5,8 +5,7 @@
   const empty = document.getElementById('projects-empty');
   const filters = document.getElementById('filters');
   const hero = document.getElementById('hero');
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
+  
   document.getElementById('year').textContent = new Date().getFullYear();
 
   // Тема
@@ -37,34 +36,10 @@
     el.style.setProperty('--ay', `${(sign(1) * r(1, 8, 13)).toFixed(1)}px`);
     el.style.setProperty('--ax', `${(sign(2) * r(2, 8, 15)).toFixed(1)}px`);
     el.style.setProperty('--ar', `${(sign(3) * r(3, 1.5, 3)).toFixed(2)}deg`);
-    el.style.setProperty('--tb', `${r(4, 2.4, 3.6).toFixed(2)}s`);
-    el.style.setProperty('--td', `${r(5, 3.4, 5.2).toFixed(2)}s`);
-    el.style.setProperty('--tt', `${r(6, 4, 6.5).toFixed(2)}s`);
+    el.style.setProperty('--tb', `${r(4, 2.9, 4.3).toFixed(2)}s`);
+    el.style.setProperty('--td', `${r(5, 4.1, 6.2).toFixed(2)}s`);
+    el.style.setProperty('--tt', `${r(6, 4.8, 7.8).toFixed(2)}s`);
   });
-
-  // Лёгкий параллакс плашек за курсором, только десктоп с мышью
-  const desktop = matchMedia('(min-width: 1201px) and (pointer: fine)');
-  if (!reduceMotion) {
-    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
-    const tick = () => {
-      cx += (tx - cx) * 0.08;
-      cy += (ty - cy) * 0.08;
-      hero.style.setProperty('--mx', cx.toFixed(2));
-      hero.style.setProperty('--my', cy.toFixed(2));
-      raf = Math.abs(tx - cx) + Math.abs(ty - cy) > 0.05 ? requestAnimationFrame(tick) : 0;
-    };
-    hero.addEventListener('pointermove', (e) => {
-      if (!desktop.matches) return;
-      const r = hero.getBoundingClientRect();
-      tx = ((e.clientX - r.left) / r.width - 0.5) * -28;
-      ty = ((e.clientY - r.top) / r.height - 0.5) * -20;
-      if (!raf) raf = requestAnimationFrame(tick);
-    });
-    hero.addEventListener('pointerleave', () => {
-      tx = 0; ty = 0;
-      if (!raf) raf = requestAnimationFrame(tick);
-    });
-  }
 
   // Каталог
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({

@@ -296,7 +296,7 @@ img { display: block; max-width: 100%; }
   position: absolute;
   left: var(--x);
   top: var(--y);
-  transform: translate(-50%, -50%) translate3d(calc(var(--mx, 0) * var(--d) * 1px), calc(var(--my, 0) * var(--d) * 1px), 0);
+  transform: translate(-50%, -50%);
 }
 /* Три независимых движения с разными периодами: траектория не повторяется и выглядит живой */
 .float__in {
@@ -668,8 +668,8 @@ img { display: block; max-width: 100%; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .float__in, .down__arrow svg, .contact__fill::after { animation: none; }
-  .float { transform: translate(-50%, -50%); }
+  /* Парение плашек оставляем всегда, даже при «уменьшить движение» в системе */
+  .down__arrow svg, .contact__fill::after { animation: none; }
   .js .hero__line, .js .chip, .js .reveal { opacity: 1; transform: none; transition: none; }
 }
 @media (prefers-reduced-motion: reduce) and (max-width: 1200px) {
