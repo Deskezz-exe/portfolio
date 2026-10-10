@@ -1,0 +1,21 @@
+# Публикуется только сайт. Всё, что не перечислено ниже, в репозиторий не попадает.
+# Новые проекты кладутся в projects/имя/, отдельно ничего добавлять не нужно.
+/*
+!/index.html
+!/styles.css
+!/script.js
+!/projects.js
+!/fonts/
+!/assets/
+!/projects/
+
+# Служебные и черновые файлы в любых папках
+.*
+*.md
+*.map
+Thumbs.db
+desktop.ini
+
+!/.gitignore
+!/.gitattributes
+!/.nojekyll
