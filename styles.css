@@ -300,17 +300,21 @@ img { display: block; max-width: 100%; }
 }
 /* Три независимых движения с разными периодами: траектория не повторяется и выглядит живой */
 .float__in {
-  --ay: -14px;
-  --ax: 7px;
-  --ar: 1.4deg;
+  /* Размах и периоды задаются для каждой плашки в script.js, здесь значения по умолчанию */
+  --ay: 10px;
+  --ax: 12px;
+  --ar: 2deg;
+  --tb: 3.2s;
+  --td: 4.6s;
+  --tt: 5.4s;
+  --k: 1;
   display: block;
   animation:
-    bob calc(var(--t) * .55) ease-in-out calc(var(--i) * -.83s) infinite alternate,
-    drift calc(var(--t) * .9) ease-in-out calc(var(--i) * -1.37s) infinite alternate,
-    tilt calc(var(--t) * 1.25) ease-in-out calc(var(--i) * -.61s) infinite alternate;
+    bob var(--tb) ease-in-out calc(var(--i) * -.83s) infinite alternate,
+    drift var(--td) ease-in-out calc(var(--i) * -1.37s) infinite alternate,
+    tilt var(--tt) ease-in-out calc(var(--i) * -.61s) infinite alternate;
   will-change: transform, translate, rotate;
 }
-.float:nth-child(even) .float__in { animation-direction: alternate-reverse; }
 .chip {
   display: inline-flex;
   align-items: center;
@@ -344,16 +348,16 @@ img { display: block; max-width: 100%; }
 .is-ready .chip { opacity: 1; transform: none; }
 
 @keyframes bob {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(0, var(--ay), 0); }
+  from { transform: translate3d(0, calc(var(--ay) * var(--k) * -1), 0); }
+  to { transform: translate3d(0, calc(var(--ay) * var(--k)), 0); }
 }
 @keyframes drift {
-  from { translate: calc(var(--ax) * -1) 0; }
-  to { translate: var(--ax) 0; }
+  from { translate: calc(var(--ax) * var(--k) * -1) 0; }
+  to { translate: calc(var(--ax) * var(--k)) 0; }
 }
 @keyframes tilt {
-  from { rotate: calc(var(--ar) * -1); }
-  to { rotate: var(--ar); }
+  from { rotate: calc(var(--ar) * var(--k) * -1); }
+  to { rotate: calc(var(--ar) * var(--k)); }
 }
 .is-paused .float__in { animation-play-state: paused; }
 
@@ -609,7 +613,7 @@ img { display: block; max-width: 100%; }
   .float { position: static; transform: none; }
   .chip { font-size: 15px; padding: 9px 16px 9px 13px; }
   .hero__bottom { padding-top: 48px; }
-  .float__in { --ay: -5px; --ax: 3px; --ar: .8deg; }
+  .float__in { --k: .5; }
 
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

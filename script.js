@@ -29,6 +29,19 @@
     new IntersectionObserver(([e]) => hero.classList.toggle('is-paused', !e.isIntersecting)).observe(hero);
   }
 
+  // Своё направление, размах и скорость для каждой плашки (стабильно от индекса)
+  const rand = (n) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+  document.querySelectorAll('.float__in').forEach((el, i) => {
+    const r = (k, min, max) => min + rand(i * 7 + k) * (max - min);
+    const sign = (k) => (rand(i * 11 + k) > 0.5 ? 1 : -1);
+    el.style.setProperty('--ay', `${(sign(1) * r(1, 8, 13)).toFixed(1)}px`);
+    el.style.setProperty('--ax', `${(sign(2) * r(2, 8, 15)).toFixed(1)}px`);
+    el.style.setProperty('--ar', `${(sign(3) * r(3, 1.5, 3)).toFixed(2)}deg`);
+    el.style.setProperty('--tb', `${r(4, 2.4, 3.6).toFixed(2)}s`);
+    el.style.setProperty('--td', `${r(5, 3.4, 5.2).toFixed(2)}s`);
+    el.style.setProperty('--tt', `${r(6, 4, 6.5).toFixed(2)}s`);
+  });
+
   // Лёгкий параллакс плашек за курсором, только десктоп с мышью
   const desktop = matchMedia('(min-width: 1201px) and (pointer: fine)');
   if (!reduceMotion) {
