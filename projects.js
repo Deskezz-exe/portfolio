@@ -14,6 +14,16 @@
 
 window.PROJECTS = [
   {
+    title: 'Cargo1090',
+    type: 'Сайт компании',
+    category: 'Сайты',
+    description: 'Сайт карго-компании по доставке грузов из Китая: направления, тарифы, отзывы, ответы на частые вопросы и форма заявки. Дизайн предоставлен заказчиком, вёрстка и разработка мои.',
+    image: 'assets/cargo1090.jpg',
+    status: 'live',
+    stack: ['HTML', 'CSS', 'JavaScript', 'PHP'],
+    demo: 'https://cargo1090.com/',
+  },
+  {
     title: 'Nomu',
     type: 'Интернет-магазин',
     category: 'Сайты',

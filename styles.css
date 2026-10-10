@@ -483,7 +483,7 @@ img { display: block; max-width: 100%; }
 }
 .card__badge {
   position: absolute;
-  top: 12px;
+  bottom: 12px;
   left: 12px;
   display: inline-flex;
   align-items: center;
