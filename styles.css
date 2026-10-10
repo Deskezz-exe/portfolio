@@ -446,8 +446,8 @@ img { display: block; max-width: 100%; }
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  margin-top: 32px;
+  gap: 64px 24px;
+  margin-top: 64px;
 }
 .grid:empty { display: none; }
 
@@ -457,7 +457,7 @@ img { display: block; max-width: 100%; }
   border-radius: 26px;
   background: var(--surface);
   border: 1px solid var(--line);
-  overflow: hidden;
+  position: relative;
   transition: transform .35s var(--ease), box-shadow .35s var(--ease), background-color .4s ease, border-color .4s ease;
 }
 .card:hover { transform: translateY(-4px); box-shadow: var(--card-shadow); }
@@ -481,27 +481,47 @@ img { display: block; max-width: 100%; }
   font-weight: 100;
   text-transform: uppercase;
 }
-.card__badge {
+/* Бирка статуса: торчит над карточкой, как карта из кошелька */
+.card__tab {
   position: absolute;
-  bottom: 12px;
-  left: 12px;
+  bottom: 100%;
+  left: 30px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 12px;
-  border-radius: 999px;
-  background: var(--surface);
-  color: var(--ink);
-  font-size: 13px;
+  gap: 8px;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 13px 13px 0 0;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 13.5px;
   font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  transition: background-color .4s ease, color .4s ease;
 }
-.card__badge--live { background: var(--accent); color: var(--on-accent); }
-.card__badge--live::before {
+/* Вогнутые скругления у основания бирки */
+.card__tab::before,
+.card__tab::after {
   content: "";
-  width: 6px;
-  height: 6px;
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  transition: background .4s ease;
+}
+.card__tab::before { right: 100%; background: radial-gradient(circle at 0 0, transparent 11.5px, var(--ink) 12px); }
+.card__tab::after { left: 100%; background: radial-gradient(circle at 100% 0, transparent 11.5px, var(--ink) 12px); }
+.card__dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: currentColor;
+  background: color-mix(in srgb, var(--bg) 50%, transparent);
+}
+.card__tab--live .card__dot {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 .card__body { display: flex; flex-direction: column; flex: 1; padding: 20px 22px 22px; }
 .card__type { color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
@@ -646,7 +666,8 @@ img { display: block; max-width: 100%; }
   .projects { padding: 72px 0 40px; }
   .section-head { flex-direction: column; align-items: center; gap: 14px; text-align: center; }
   .filters { justify-content: center; }
-  .grid { grid-template-columns: 1fr; gap: 16px; margin-top: 24px; }
+  .grid { grid-template-columns: 1fr; gap: 56px; margin-top: 56px; }
+  .card__tab { left: 50%; transform: translateX(-50%); }
   .card__body { align-items: center; text-align: center; }
   .card__stack, .card__actions { justify-content: center; }
   .card__actions { width: 100%; }

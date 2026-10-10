@@ -51,8 +51,8 @@
 
   function card(p) {
     const badge = p.status === 'live'
-      ? '<span class="card__badge card__badge--live">Работает у клиента</span>'
-      : '<span class="card__badge">Демо</span>';
+      ? '<span class="card__tab card__tab--live"><i class="card__dot"></i>Работает у клиента</span>'
+      : '<span class="card__tab"><i class="card__dot"></i>Демо</span>';
     const preview = p.image
       ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`
       : `<span class="card__placeholder">${esc(p.title.charAt(0))}</span>`;
@@ -61,8 +61,9 @@
 
     return `
       <article class="card reveal">
+        ${badge}
         <a class="card__preview" href="${esc(p.demo || '#')}"${target(p.demo)} tabindex="-1" aria-hidden="true">
-          ${preview}${badge}
+          ${preview}
         </a>
         <div class="card__body">
           ${p.type ? `<p class="card__type">${esc(p.type)}</p>` : ''}
