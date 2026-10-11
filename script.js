@@ -52,12 +52,14 @@
   function card(p) {
     const badge = p.status === 'live'
       ? '<span class="card__tab card__tab--live"><i class="card__dot"></i>Работает у клиента</span>'
-      : '<span class="card__tab"><i class="card__dot"></i>Демо</span>';
+      : p.status === 'app'
+        ? '<span class="card__tab"><i class="card__dot"></i>Приложение</span>'
+        : '<span class="card__tab"><i class="card__dot"></i>Демо</span>';
     const preview = p.image
       ? `<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy">`
       : `<span class="card__placeholder">${esc(p.title.charAt(0))}</span>`;
     const stack = (p.stack || []).map((s) => `<li>${esc(s)}</li>`).join('');
-    const demoLabel = p.status === 'live' ? 'Открыть сайт' : 'Открыть демо';
+    const demoLabel = p.status === 'live' ? 'Открыть сайт' : p.status === 'app' ? 'Подробнее' : 'Открыть демо';
 
     return `
       <article class="card reveal">

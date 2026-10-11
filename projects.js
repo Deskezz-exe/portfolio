@@ -33,4 +33,15 @@ window.PROJECTS = [
     stack: ['Next.js', 'TypeScript', 'Tailwind CSS'],
     demo: 'projects/nomu/',
   },
+  {
+    title: 'OwlSSH',
+    type: 'Десктопное приложение',
+    category: 'Приложения',
+    description: 'SSH-клиент для Windows, macOS и Linux: быстрый терминал, живая панель серверов, двухпанельный файловый менеджер и встроенный MCP-сервер, через который ИИ-ассистент работает на тех же серверах с подтверждением опасных действий.',
+    image: 'assets/owlssh.jpg',
+    status: 'app',
+    stack: ['Tauri 2', 'Rust', 'Svelte 5', 'TypeScript', 'MCP'],
+    demo: 'projects/owlssh/',
+    code: 'https://github.com/Deskezz-exe/OwlSSH-with-mcp',
+  },
 ];

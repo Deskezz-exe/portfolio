@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OwlSSH · Deskezz.exe</title>
+  <meta name="description" content="SSH-клиент с живой панелью серверов, файловым менеджером и встроенным MCP-сервером для ИИ-ассистентов.">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('theme'); } catch (e) {}
+      document.documentElement.dataset.theme = t === 'dark' ? 'dark' : 'light';
+    })();
+  </script>
+  <style>
+    @font-face { font-family: "Exo 2"; src: url("../../fonts/Exo2-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Exo 2"; src: url("../../fonts/Exo2-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+    :root {
+      --bg: #f3f3ef; --surface: #fff; --ink: #111; --ink-2: #3c3c38; --muted: #76766f;
+      --line: #dfdfd8; --accent: #d4f53c; --on-accent: #111;
+      --shadow: 0 2px 4px rgba(17,17,17,.04), 0 20px 44px rgba(17,17,17,.09);
+    }
+    [data-theme="dark"] {
+      --bg: #0f100e; --surface: #191a17; --ink: #f0f0ea; --ink-2: #c7c7bf; --muted: #8b8b83;
+      --line: #2b2c28; --shadow: 0 2px 4px rgba(0,0,0,.3), 0 20px 44px rgba(0,0,0,.45);
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 "Exo 2", system-ui, "Segoe UI", sans-serif; }
+    a { color: inherit; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+    .top { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; }
+    .top a { text-decoration: none; font-weight: 700; }
+    .top .back { color: var(--muted); font-weight: 400; }
+    .top .back:hover { color: var(--ink); }
+    h1 { font-size: clamp(38px, 6vw, 64px); line-height: 1.05; margin: 12px 0 14px; letter-spacing: -.01em; }
+    h2 { font-size: 26px; margin: 64px 0 18px; }
+    .lead { font-size: 20px; color: var(--ink-2); max-width: 760px; margin: 0 0 24px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0 0 28px; }
+    .tags li { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 3px 13px; font-size: 14px; color: var(--ink-2); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn { display: inline-flex; align-items: center; padding: 11px 22px; border-radius: 99px; border: 1px solid var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; transition: background .2s, color .2s, border-color .2s; }
+    .btn--solid { background: var(--ink); color: var(--bg); }
+    .btn--solid:hover { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .btn--ghost:hover { background: var(--ink); color: var(--bg); }
+    figure { margin: 0; }
+    .shot { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); box-shadow: var(--shadow); background: #121214; }
+    figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+    .hero-shot { margin-top: 44px; }
+    .grid3 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .cards div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; }
+    .cards h3 { margin: 0 0 8px; font-size: 18px; }
+    .cards p { margin: 0; color: var(--ink-2); font-size: 15.5px; }
+    code { font: 14px/1 ui-monospace, Consolas, monospace; background: var(--surface); border: 1px solid var(--line); padding: 2px 6px; border-radius: 6px; }
+    ul.plain { padding-left: 20px; color: var(--ink-2); }
+    ul.plain li { margin: 6px 0; }
+    footer { margin: 80px 0 40px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 700px) { .grid3 { grid-template-columns: 1fr; } h2 { margin-top: 48px; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="../../">← Все проекты</a>
+      <a href="../../">Deskezz.exe</a>
+    </div>
+
+    <h1>OwlSSH</h1>
+    <p class="lead">Десктопный SSH-клиент для Windows, macOS и Linux. Быстрый терминал, живая панель серверов, файловый менеджер и встроенный MCP-сервер: ИИ-ассистент работает на тех же серверах, что и вы, а опасные действия ждут вашего подтверждения.</p>
+    <ul class="tags">
+      <li>Tauri 2</li><li>Rust</li><li>Svelte 5</li><li>TypeScript</li><li>xterm.js</li><li>MCP</li>
+    </ul>
+    <div class="actions">
+      <a class="btn btn--solid" href="https://github.com/Deskezz-exe/OwlSSH-with-mcp/releases/latest" target="_blank" rel="noopener">Скачать</a>
+      <a class="btn btn--ghost" href="https://github.com/Deskezz-exe/OwlSSH-with-mcp" target="_blank" rel="noopener">Исходный код</a>
+    </div>
+
+    <figure class="hero-shot">
+      <img class="shot" src="demo.gif" alt="OwlSSH: терминал, панель серверов, передача файлов, палитра команд и запрос подтверждения от ИИ" width="1280" height="760">
+      <figcaption>Терминал, панель серверов, передача файлов и запрос подтверждения от ИИ-ассистента.</figcaption>
+    </figure>
+
+    <h2>Что умеет</h2>
+    <div class="cards">
+      <div><h3>Терминал без задержек</h3><p>Вкладки с настоящим PTY, xterm.js с WebGL, <code>TCP_NODELAY</code>, вывод потоком байтов. Горячие клавиши копирования и вставки настраиваются и работают на любой раскладке.</p></div>
+      <div><h3>Панель серверов</h3><p>Карточка на сервер: CPU, RAM, диск, нагрузка, процессы и Docker-контейнеры. Ничего не нужно ставить на сервер, хватает одного запроса по уже открытому соединению.</p></div>
+      <div><h3>Файлы</h3><p>Две панели: компьютер и сервер. Перетаскивание, в том числе из проводника, рекурсивная передача папок с прогрессом и отменой.</p></div>
+      <div><h3>Безопасность</h3><p>Пароли в хранилище ОС, проверка отпечатков хостов, ключи и SSH-агент, jump-хосты, режим стримера, скрывающий реальные адреса.</p></div>
+      <div><h3>Сниппеты и поиск</h3><p>Команды с плейсхолдерами на один или несколько серверов сразу, палитра <code>Ctrl+K</code> для серверов, вкладок и экранов.</p></div>
+      <div><h3>Русский и английский</h3><p>Интерфейс на двух языках, тёмная, светлая или системная тема.</p></div>
+    </div>
+
+    <h2>ИИ-ассистенты через MCP</h2>
+    <p class="lead" style="font-size:17px">OwlSSH запускает MCP-сервер на <code>127.0.0.1</code>. Claude Code, Cursor и другие клиенты выполняют команды и передают файлы через соединения приложения, а не через собственные ключи.</p>
+    <div class="grid3">
+      <figure>
+        <img class="shot" src="approval.png" alt="Запрос подтверждения команды от Claude Code" loading="lazy" width="1280" height="760">
+        <figcaption>Рискованная команда ждёт решения. Без ответа она отклоняется через 3 минуты.</figcaption>
+      </figure>
+      <figure>
+        <img class="shot" src="files.png" alt="Двухпанельный файловый менеджер" loading="lazy" width="1280" height="760">
+        <figcaption>Файловый менеджер: компьютер слева, сервер справа.</figcaption>
+      </figure>
+    </div>
+    <ul class="plain">
+      <li>Сервер слушает только loopback и требует токен, который можно перевыпустить.</li>
+      <li>Удаление данных, остановка сервисов и любая запись файлов идут через диалог подтверждения. Ассистент не может подтвердить запрос сам.</li>
+      <li>Полный доступ (правка, переименование, удаление) выключен по умолчанию.</li>
+      <li>Каждый вызов попадает в журнал: кто, на каком сервере, что сделал и чем закончилось.</li>
+    </ul>
+
+    <h2>Панель серверов</h2>
+    <figure>
+      <img class="shot" src="dashboard.png" alt="Панель серверов с живой нагрузкой" loading="lazy" width="1280" height="760">
+    </figure>
+
+    <footer>Сборки для Windows, macOS и Linux лежат в разделе Releases на GitHub.</footer>
+  </div>
+</body>
+</html>
