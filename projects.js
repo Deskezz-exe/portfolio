@@ -44,4 +44,14 @@ window.PROJECTS = [
     demo: 'projects/owlssh/',
     code: 'https://github.com/Deskezz-exe/OwlSSH-with-mcp',
   },
+  {
+    title: 'Vesper',
+    type: 'Контент-завод для бренда',
+    category: 'Автоматизация',
+    description: 'Панель для производства контента бренда: генерация постов, картинок, видео и каруселей, лента готовых материалов, ресерч тем, база идей, автопостинг на несколько площадок и учёт баланса API. Данные в демо вымышленные, генерация имитируется.',
+    image: 'assets/vesper.jpg',
+    status: 'demo',
+    stack: ['JavaScript', 'HTML', 'CSS'],
+    demo: 'projects/vesper/',
+  },
 ];
