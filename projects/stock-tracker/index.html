@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Демо: дашборд остатков и оборачиваемости для селлера на Ozon и Wildberries. Все данные вымышленные.">
+<title>Трекер остатков · Ozon и Wildberries</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237b6cff'/%3E%3Cstop offset='1' stop-color='%23e24fd2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M7 11l9-4.5 9 4.5v10l-9 4.5-9-4.5z M7 11l9 4.5 9-4.5 M16 15.5V26' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080a12; --panel:rgba(22,26,46,.66); --panel-solid:#141829; --p2:rgba(255,255,255,.045); --p3:rgba(255,255,255,.085);
+  --border:rgba(150,160,255,.13); --border2:rgba(150,160,255,.3);
+  --text:#eef0fc; --dim:#9aa1c4; --faint:#646c96;
+  --accent:#7b6cff; --accent2:#e24fd2; --grad:linear-gradient(135deg,#7b6cff 0%,#b157f0 55%,#e24fd2 100%);
+  --wb:#bb63ff; --wb-bg:rgba(187,99,255,.15); --oz:#4d92ff; --oz-bg:rgba(77,146,255,.15); --fbs:#ffb454; --fbs-bg:rgba(255,180,84,.15);
+  --ok:#35d6a0; --ok-bg:rgba(53,214,160,.13); --warn:#ffb84d; --warn-bg:rgba(255,184,77,.13); --danger:#ff6b86; --danger-bg:rgba(255,107,134,.14);
+  --shadow:0 18px 50px -22px rgba(0,0,0,.75); --glow:0 0 0 1px rgba(123,108,255,.5),0 8px 30px -8px rgba(123,108,255,.55);
+  --grid:rgba(255,255,255,.035); --tg:#0e1621; --tg-b:#1f2c38; --tg-t:#e8f0fa;
+  --on-grad:#fff; --r:16px; color-scheme:dark;
+}
+:root[data-theme=light]{
+  --bg:#f2f3fb; --panel:rgba(255,255,255,.82); --panel-solid:#ffffff; --p2:rgba(30,36,100,.045); --p3:rgba(30,36,100,.085);
+  --border:rgba(40,50,120,.12); --border2:rgba(40,50,120,.28);
+  --text:#14173a; --dim:#586087; --faint:#8b92b6;
+  --accent:#6354f0; --accent2:#cf3bbf;
+  --wb:#a23fe6; --wb-bg:rgba(162,63,230,.11); --oz:#2a76ee; --oz-bg:rgba(42,118,238,.11); --fbs:#d98410; --fbs-bg:rgba(217,132,16,.12);
+  --ok:#0ea877; --ok-bg:rgba(14,168,119,.11); --warn:#d98410; --warn-bg:rgba(217,132,16,.12); --danger:#e0364f; --danger-bg:rgba(224,54,79,.1);
+  --shadow:0 16px 40px -22px rgba(40,50,120,.35); --glow:0 0 0 1px rgba(99,84,240,.5),0 8px 26px -8px rgba(99,84,240,.4);
+  --grid:rgba(40,50,120,.05); color-scheme:light;
+}
+*{box-sizing:border-box}
+.fav-grid>*,.set-layout>*,.plan-layout>*,.prow>*,.ov-row>*,.ov-row2>*,.pc-body>*,.st2>*,.kpis>*{min-width:0}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text); background:var(--bg); min-height:100vh;
+  font:14px/1.5 "Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-feature-settings:"tnum" 1,"cv11" 1; -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:-2; pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 6% -12%, rgba(123,108,255,.24), transparent 62%),
+    radial-gradient(760px 480px at 100% -4%, rgba(226,79,210,.15), transparent 62%),
+    radial-gradient(800px 600px at 55% 112%, rgba(77,146,255,.13), transparent 60%);
+}
+:root[data-theme=light] body::before{
+  background:
+    radial-gradient(900px 520px at 6% -12%, rgba(123,108,255,.2), transparent 62%),
+    radial-gradient(760px 480px at 100% -4%, rgba(226,79,210,.12), transparent 62%),
+    radial-gradient(800px 600px at 55% 112%, rgba(77,146,255,.12), transparent 60%);
+}
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(var(--grid) 1px, transparent 1.2px) 0 0/22px 22px;
+  -webkit-mask:linear-gradient(180deg,#000 0,transparent 70%); mask:linear-gradient(180deg,#000 0,transparent 70%);
+}
+button,input,select{font:inherit; color:inherit}
+button{cursor:pointer}
+svg.i{width:1.1em;height:1.1em;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.16em}
+::selection{background:rgba(123,108,255,.4)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--p3);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--border2);background-clip:padding-box;border:2px solid transparent}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---------- Шапка ---------- */
+.topbar{position:sticky; top:0; z-index:40; backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 82%,transparent),color-mix(in srgb,var(--bg) 58%,transparent)); border-bottom:1px solid var(--border)}
+.topbar-in{max-width:1440px; margin:0 auto; padding:12px 24px; display:flex; align-items:center; gap:18px}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.logo{width:38px;height:38px;border-radius:11px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 24px -8px rgba(177,87,240,.7),inset 0 1px 0 rgba(255,255,255,.35);flex:none}
+.logo svg{width:21px;height:21px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.brand h1{margin:0;font-size:16px;font-weight:700;letter-spacing:-.015em;line-height:1.2;white-space:nowrap}
+.brand .sub{font-size:11.5px;color:var(--dim);white-space:nowrap}
+.demo-chip{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:99px;
+  color:var(--warn);background:var(--warn-bg);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);margin-left:4px}
+.demo-chip::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 0 var(--warn);animation:ping 2.2s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.spacer{flex:1}
+.top-actions{display:flex;align-items:center;gap:8px}
+.sync-info{font-size:11.5px;color:var(--dim);text-align:right;line-height:1.25;margin-right:4px;white-space:nowrap}
+.sync-info b{color:var(--text);font-weight:600;display:block}
+.tabs-wrap{max-width:1440px;margin:0 auto;padding:0 24px 10px;overflow-x:auto;scrollbar-width:none}
+.tabs-wrap::-webkit-scrollbar{display:none}
+nav.tabs{display:inline-flex;gap:4px;padding:4px;background:var(--p2);border:1px solid var(--border);border-radius:14px;min-width:min-content}
+nav.tabs button{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--dim);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap;transition:.18s}
+nav.tabs button:hover{color:var(--text);background:var(--p2)}
+nav.tabs button.active{color:var(--on-grad);background:var(--grad);box-shadow:0 6px 18px -6px rgba(177,87,240,.7),inset 0 1px 0 rgba(255,255,255,.25)}
+nav.tabs .cnt{font-size:10.5px;padding:1px 6px;border-radius:99px;background:var(--p3);color:var(--text)}
+nav.tabs button.active .cnt{background:rgba(255,255,255,.22);color:#fff}
+
+/* ---------- Кнопки ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--p2);border:1px solid var(--border);color:var(--text);
+  padding:8px 14px;border-radius:11px;font-size:13px;font-weight:600;min-height:38px;transition:.16s;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+.btn:hover{border-color:var(--border2);background:var(--p3)}
+.btn:active{transform:translateY(1px)}
+.btn.accent{background:var(--grad);border-color:transparent;color:var(--on-grad);box-shadow:0 8px 22px -10px rgba(177,87,240,.9),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn.accent:hover{filter:brightness(1.1)}
+.btn.sm{padding:5px 11px;min-height:30px;font-size:12px;border-radius:9px}
+.btn.icon{padding:0;width:38px}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,transparent);background:transparent}
+.btn.danger:hover{background:var(--danger-bg)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn kbd{font:600 10.5px/1 inherit;padding:3px 5px;border-radius:5px;background:var(--p3);color:var(--dim);border:1px solid var(--border)}
+.btn.spin svg{animation:rot .9s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ---------- Каркас ---------- */
+main{max-width:1440px;margin:0 auto;padding:22px 24px 70px}
+section.view{animation:fade .35s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:relative}
+.card.pad{padding:18px 20px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.card-h h3{margin:0;font-size:14px;font-weight:700;letter-spacing:-.01em}
+.card-h .hint{font-size:12px;color:var(--dim)}
+.h2{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 18px}
+.h2 h2{margin:0;font-size:22px;letter-spacing:-.025em;font-weight:750}
+.h2 p{margin:3px 0 0;color:var(--dim);font-size:13px;max-width:62ch}
+.grid{display:grid;gap:16px}
+.empty{color:var(--dim);padding:44px 14px;text-align:center;line-height:1.7}
+.empty .big{font-size:34px;margin-bottom:6px;opacity:.8}
+
+/* ---------- Бейджи / пилюли ---------- */
+.mp{display:inline-flex;align-items:center;font-size:10px;font-weight:800;text-transform:uppercase;padding:2px 7px;border-radius:6px;letter-spacing:.05em;margin-right:6px;vertical-align:1px}
+.mp.wb{background:var(--wb-bg);color:var(--wb)} .mp.ozon{background:var(--oz-bg);color:var(--oz)} .mp.fbs{background:var(--fbs-bg);color:var(--fbs)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:99px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.pill.red{background:var(--danger-bg);color:var(--danger)} .pill.amber{background:var(--warn-bg);color:var(--warn)} .pill.green{background:var(--ok-bg);color:var(--ok)} .pill.gray{background:var(--p3);color:var(--dim)}
+.pill.plain::before{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);background:var(--p2);border:1px solid var(--border);border-radius:8px;padding:2px 9px;white-space:nowrap}
+.chip b{color:var(--text);font-weight:700}
+.chip.off{opacity:.5}
+.tag{font-size:10px;color:var(--dim);border:1px solid var(--border);border-radius:5px;padding:0 5px;margin-left:7px;font-weight:600;vertical-align:1px}
+.up{color:var(--ok);font-weight:700} .down{color:var(--danger);font-weight:700} .neutral{color:var(--dim)}
+
+/* ---------- Сегмент ---------- */
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:3px;padding:3px;background:var(--p2);border:1px solid var(--border);border-radius:11px}
+.seg button{background:none;border:0;color:var(--dim);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:650;transition:.15s;white-space:nowrap}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--grad);color:var(--on-grad);box-shadow:0 4px 14px -6px rgba(177,87,240,.8)}
+
+/* ---------- Обзор ---------- */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.kpi{padding:16px 18px 14px;overflow:hidden;transition:.2s}
+.kpi:hover{transform:translateY(-2px);border-color:var(--border2)}
+.kpi .lbl{font-size:12px;color:var(--dim);font-weight:600;display:flex;align-items:center;gap:7px}
+.kpi .lbl i{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:var(--p3);font-style:normal;color:var(--accent)}
+.kpi .val{font-size:27px;font-weight:760;letter-spacing:-.03em;margin:8px 0 2px;line-height:1.1}
+.kpi .val small{font-size:14px;font-weight:600;color:var(--dim);margin-left:3px;letter-spacing:0}
+.kpi .dl{font-size:12px;display:flex;align-items:center;gap:6px;color:var(--dim)}
+.kpi .spark{display:block;width:100%;height:36px;margin-top:12px;opacity:.95}
+.kpi.glow::after{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:var(--grad);opacity:.5;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.ov-row{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.ov-row2{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:9px;height:9px;border-radius:3px;display:inline-block}
+.legend b{color:var(--text);font-weight:700}
+.chartbox{position:relative}
+.chartbox svg{display:block;width:100%;height:auto;overflow:visible}
+.chart-tip{position:absolute;pointer-events:none;z-index:5;min-width:150px;padding:9px 11px;border-radius:11px;font-size:12px;background:var(--panel-solid);border:1px solid var(--border2);box-shadow:0 14px 36px -10px rgba(0,0,0,.6);opacity:0;transition:opacity .12s;transform:translate(-50%,-100%)}
+.chart-tip .d{color:var(--dim);font-size:11px;margin-bottom:5px}
+.chart-tip .r{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.chart-tip .r span{display:inline-flex;align-items:center;gap:6px}
+.chart-tip .r i{width:8px;height:8px;border-radius:50%}
+.chart-tip b{font-weight:700}
+.donut-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center}
+.donut{position:relative;width:176px;height:176px;flex:none}
+.donut svg{width:100%;height:100%;transform:rotate(-90deg)}
+.donut .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.donut .mid b{font-size:25px;font-weight:760;letter-spacing:-.03em;line-height:1.1}
+.donut .mid span{font-size:11px;color:var(--dim)}
+.dl-list{display:grid;gap:10px;min-width:150px;flex:1}
+.dl-list .it{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;font-size:13px}
+.dl-list .it i{width:10px;height:10px;border-radius:3px}
+.dl-list .it small{color:var(--dim);font-size:11.5px;margin-left:6px}
+.attn{display:grid;gap:8px}
+.attn-row{display:grid;grid-template-columns:minmax(0,1.5fr) auto auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--p2);border:1px solid var(--border);cursor:pointer;transition:.16s}
+.attn-row:hover{border-color:var(--border2);background:var(--p3)}
+.attn-row .t{font-weight:650;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attn-row .s{font-size:11.5px;color:var(--dim);margin-top:1px}
+.attn-row .need{text-align:right;font-size:12px;color:var(--dim);white-space:nowrap}
+.attn-row .need b{display:block;color:var(--warn);font-size:14px}
+.tops{display:grid;gap:11px}
+.top-row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;cursor:pointer}
+.top-row .n{font-size:11px;color:var(--faint);font-weight:700}
+.top-row .nm{font-size:12.5px;font-weight:600;margin-bottom:5px;display:flex;justify-content:space-between;gap:8px}
+.top-row .nm span:last-child{color:var(--dim);font-weight:500}
+.bar2{height:7px;border-radius:99px;background:var(--p3);overflow:hidden;display:flex}
+.bar2 i{display:block;height:100%}
+.heat-wrap{overflow:auto;border-radius:12px}
+table.heat{border-collapse:separate;border-spacing:3px;font-size:11.5px;min-width:900px;width:100%}
+table.heat th{font-size:10.5px;font-weight:650;color:var(--dim);padding:4px 4px;text-align:center;white-space:nowrap}
+table.heat th.wbh{color:var(--wb)} table.heat th.ozh{color:var(--oz)}
+table.heat td.rn{white-space:nowrap;font-weight:650;padding:0 10px 0 2px;font-size:12px;position:sticky;left:0;background:var(--panel-solid);z-index:2;cursor:pointer}
+table.heat td.c{height:30px;min-width:56px;text-align:center;border-radius:7px;font-weight:700;font-size:11.5px;cursor:default;transition:transform .12s}
+table.heat td.c:hover{transform:scale(1.12);position:relative;z-index:3}
+.hm-r{background:color-mix(in srgb,var(--danger) 30%,transparent);color:var(--danger)}
+.hm-a{background:color-mix(in srgb,var(--warn) 24%,transparent);color:var(--warn)}
+.hm-g{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.hm-n{background:var(--p2);color:var(--faint);font-weight:500}
+
+/* ---------- Карточки избранного ---------- */
+.fav-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:16px;align-items:start}
+.pcard{padding:18px 20px;transition:border-color .2s,transform .2s}
+.pcard:hover{border-color:var(--border2)}
+.pcard::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:0 3px 3px 0;background:var(--st,var(--accent))}
+.pcard.st-red{--st:var(--danger)} .pcard.st-amber{--st:var(--warn)} .pcard.st-green{--st:var(--ok)} .pcard.st-gray{--st:var(--faint)}
+.pc-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.pc-title{font-size:16px;font-weight:720;letter-spacing:-.015em;cursor:pointer;word-break:break-word}
+.pc-title:hover{color:var(--accent)}
+.pc-sub{font-size:12px;color:var(--dim);margin-top:2px}
+.pc-top{display:flex;gap:6px;align-items:center;flex:none}
+.pc-body{display:grid;grid-template-columns:1fr 140px;gap:14px;margin-top:14px;align-items:center}
+.pc-nums{display:grid;grid-template-columns:repeat(3,auto);gap:6px 22px;justify-content:start}
+.pc-num .l{font-size:11px;color:var(--dim);font-weight:600}
+.pc-num .v{font-size:19px;font-weight:740;letter-spacing:-.025em;line-height:1.25}
+.pc-num .v small{font-size:12px;font-weight:600;color:var(--dim);margin-left:2px}
+.pc-spark{height:54px;width:100%}
+.stack{margin-top:14px}
+.stack .bar2{height:9px}
+.stack .lg{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px;font-size:11.5px;color:var(--dim)}
+.stack .lg span{display:inline-flex;align-items:center;gap:6px}
+.stack .lg i{width:8px;height:8px;border-radius:3px;display:inline-block}
+.stack .lg b{color:var(--text);font-weight:700}
+.file-row{margin-top:12px;font-size:12.5px;color:var(--dim);padding:8px 12px;border-radius:10px;background:var(--p2);border:1px dashed var(--border2)}
+.file-row b{color:var(--text)}
+.warn-t{color:var(--warn);font-style:italic}
+.period-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.period-row label{font-size:12.5px;color:var(--dim);font-weight:600}
+.flex-block{margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.flex-title{font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);margin-bottom:8px}
+table.cmp{width:100%;border-collapse:collapse;font-size:13px}
+table.cmp th{text-align:right;color:var(--faint);font-weight:650;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:3px 6px 6px}
+table.cmp th:first-child,table.cmp td:first-child{text-align:left}
+table.cmp td{padding:7px 6px;border-top:1px solid var(--border);text-align:right;white-space:nowrap}
+table.cmp td:first-child{color:var(--dim);white-space:normal}
+table.cmp td.cur{font-weight:700}
+.dpill{display:inline-block;padding:1px 8px;border-radius:7px;font-size:11.5px;font-weight:700}
+.dpill.up{background:var(--ok-bg)} .dpill.down{background:var(--danger-bg)} .dpill.neutral{background:var(--p3)}
+.info{display:inline-grid;place-items:center;width:14px;height:14px;border-radius:50%;background:var(--p3);color:var(--dim);font-size:9.5px;font-weight:800;cursor:help;position:relative;margin-left:5px;vertical-align:middle;font-style:normal}
+.info .tipx{display:none;position:absolute;bottom:135%;left:50%;transform:translateX(-50%);width:210px;padding:8px 10px;border-radius:9px;background:var(--panel-solid);border:1px solid var(--border2);font-size:11.5px;font-weight:400;color:var(--text);text-align:left;line-height:1.4;z-index:20;box-shadow:0 12px 30px -8px rgba(0,0,0,.5);text-transform:none;letter-spacing:0}
+.info:hover .tipx{display:block}
+.mp-sections{margin-top:14px;display:grid;gap:7px}
+.mp-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--p2);border:1px solid var(--border);border-radius:11px;padding:9px 13px;font-size:12.5px;font-weight:600;text-align:left;transition:.15s}
+.mp-btn:hover{border-color:var(--border2);background:var(--p3)}
+.mp-btn b{font-weight:740}
+.mp-btn .chev{transition:transform .2s;color:var(--dim)}
+.mp-btn.open .chev{transform:rotate(180deg)}
+.mp-body{display:none;margin-top:8px;margin-bottom:4px}
+.mp-body.open{display:block;animation:fade .25s both}
+.tw{overflow-x:auto}
+table.wh{width:100%;border-collapse:collapse;font-size:12.5px;min-width:420px}
+table.wh th{text-align:left;color:var(--faint);font-weight:650;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:4px 8px 7px;white-space:nowrap}
+table.wh td{padding:8px;border-top:1px solid var(--border);white-space:nowrap}
+table.wh td.n{font-variant-numeric:tabular-nums}
+.mini{display:inline-block;width:46px;height:5px;border-radius:9px;background:var(--p3);margin-left:8px;vertical-align:middle;overflow:hidden}
+.mini i{display:block;height:100%;border-radius:9px}
+.order-flag{color:var(--warn);font-weight:750}
+.x{background:none;border:0;color:var(--faint);padding:2px 6px;border-radius:6px;font-size:13px}
+.x:hover{color:var(--danger);background:var(--danger-bg)}
+.picker{display:none;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border2)}
+.picker.open{display:block}
+.pk-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;max-height:190px;overflow:auto}
+.pk-chip{display:inline-flex;align-items:center;gap:7px;background:var(--p2);border:1px solid var(--border);border-radius:9px;padding:6px 11px;font-size:12px;cursor:pointer;user-select:none;transition:.15s}
+.pk-chip:hover{border-color:var(--border2)}
+.pk-chip input{accent-color:var(--accent);margin:0}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.wh-empty{color:var(--dim);font-size:12.5px;padding:14px 0;text-align:center}
+
+/* ---------- Все товары ---------- */
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.search{position:relative;flex:1 1 260px;max-width:380px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--dim);width:16px;height:16px}
+.search input{width:100%;background:var(--p2);border:1px solid var(--border);border-radius:11px;padding:9px 12px 9px 36px;font-size:13px;outline:none;transition:.15s}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(123,108,255,.18)}
+.search input::placeholder{color:var(--faint)}
+.plist{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.6fr) 110px auto;gap:16px;align-items:center;padding:12px 16px;transition:.16s;cursor:pointer}
+.prow:hover{border-color:var(--border2);transform:translateX(2px)}
+.prow .nm{font-weight:680;font-size:14px;display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+.prow .ds{font-size:12px;color:var(--dim);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow .chips{display:flex;gap:6px;flex-wrap:wrap}
+.star{background:var(--p2);border:1px solid var(--border);border-radius:10px;padding:0 13px;height:36px;font-size:12.5px;font-weight:650;color:var(--dim);display:inline-flex;align-items:center;gap:7px;transition:.16s;white-space:nowrap}
+.star:hover{border-color:var(--accent);color:var(--text)}
+.star.on{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent);background:var(--warn-bg)}
+.star.on svg{fill:currentColor}
+.count-note{font-size:12px;color:var(--faint);margin:0 0 10px}
+
+/* ---------- Поставки ---------- */
+.plan-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.plan-groups{display:grid;gap:14px}
+.pg-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.pg-h .t{font-weight:720;font-size:14.5px}
+.pg-h .m{font-size:12px;color:var(--dim);margin-top:1px}
+.pg-h .tot{font-size:12px;color:var(--dim);text-align:right}
+.pg-h .tot b{font-size:18px;color:var(--text);display:block;letter-spacing:-.02em}
+.pg-r{display:grid;grid-template-columns:24px minmax(0,1.4fr) 90px 100px 90px;gap:12px;align-items:center;padding:9px 18px;border-top:1px solid var(--border);font-size:13px}
+.pg-r:first-of-type{border-top:0}
+.pg-r.off{opacity:.42}
+.pg-r input{accent-color:var(--accent);width:16px;height:16px}
+.pg-r .a{font-weight:620;cursor:pointer}
+.pg-r .a:hover{color:var(--accent)}
+.pg-r .q{text-align:right;font-weight:750;color:var(--warn)}
+.sticky-sum{position:sticky;top:132px}
+.sum-big{font-size:38px;font-weight:780;letter-spacing:-.04em;line-height:1.1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sum-list{display:grid;gap:9px;margin:16px 0;font-size:13px}
+.sum-list div{display:flex;justify-content:space-between;gap:10px;color:var(--dim)}
+.sum-list b{color:var(--text)}
+
+/* ---------- Метрики карточки / алерты ---------- */
+.set-layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+.groups{display:grid;gap:8px}
+.mg{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.mg-h{display:flex;align-items:center;justify-content:space-between;width:100%;padding:13px 16px;background:none;border:0;font-size:13px;font-weight:720;text-align:left}
+.mg-h:hover{background:var(--p2)}
+.mg-h .c{color:var(--dim);font-weight:500;font-size:12px;margin-left:8px}
+.mg-h .arr{color:var(--dim);transition:transform .2s}
+.mg.open .arr{transform:rotate(180deg)}
+.mg-b{display:none;padding:2px 16px 10px}
+.mg.open .mg-b{display:block}
+.tg-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.tg-row:last-child{border-bottom:0}
+.tg-row .l{font-size:13px;display:block}
+.tg-row .s{display:block;font-size:11px;color:var(--dim);margin-top:1px}
+.sw{position:relative;display:inline-block;width:40px;height:23px;flex:none}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;border-radius:99px;background:var(--p3);border:1px solid var(--border);cursor:pointer;transition:.2s}
+.sw span::before{content:"";position:absolute;left:2px;top:2px;width:17px;height:17px;border-radius:50%;background:var(--dim);transition:.2s}
+.sw input:checked+span{background:var(--grad);border-color:transparent}
+.sw input:checked+span::before{transform:translateX(17px);background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.sw input:disabled+span{opacity:.45;cursor:default}
+.sw input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.save-note{font-size:12px;color:var(--ok);min-height:18px;margin-top:10px;font-weight:600}
+.sticky-p{position:sticky;top:132px}
+.sticky-p h3{margin:0 0 10px;font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--dim)}
+.lead{font-size:13px;color:var(--dim);margin:0 0 16px;max-width:72ch}
+.bot{padding:16px 18px;margin-bottom:16px}
+.bot-f{display:flex;gap:20px;flex-wrap:wrap}
+.bot-f .field{flex:1 1 260px;min-width:220px}
+.field label{display:block;font-size:11.5px;color:var(--dim);margin-bottom:6px;font-weight:600}
+.inp{width:100%;background:var(--p2);border:1px solid var(--border);border-radius:10px;padding:8px 11px;font-size:13px;outline:none;min-width:0;transition:.15s}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(123,108,255,.18)}
+.inp.num{width:74px;text-align:center;padding:6px 8px}
+select.inp{width:auto;max-width:100%;cursor:pointer}
+.row{display:flex;gap:7px;align-items:center}
+.chips-l{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;min-height:30px}
+.chat-chip{display:inline-flex;align-items:center;gap:6px;background:var(--p2);border:1px solid var(--border);border-radius:9px;padding:4px 5px 4px 11px;font-size:12px}
+.bot-st{font-size:11.5px;padding:3px 10px;border-radius:99px;background:var(--ok-bg);color:var(--ok);font-weight:650}
+.compact{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.cit{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:9px 14px}
+.cit .l{font-size:12.5px;color:var(--dim);white-space:nowrap}
+.fblock{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:15px 17px;margin-bottom:10px}
+.fblock h4{margin:0 0 10px;font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--dim)}
+.sub-t{padding-left:12px}
+.sub-t .l{color:var(--dim)}
+.tchips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tchip{display:inline-flex;align-items:center;gap:8px;background:var(--p2);border:1px solid var(--border);border-radius:10px;padding:5px 6px 5px 11px;font-size:13px;transition:.15s}
+.tchip.edit{cursor:pointer}
+.tchip.edit:hover{border-color:var(--accent)}
+.tchip.bad{border-color:var(--danger);color:var(--danger)}
+.tchip button{background:none;border:0;color:var(--dim);font-size:13px;padding:0 4px}
+.tchip button:hover{color:var(--danger)}
+.add-t{background:none;border:1px dashed var(--border2);color:var(--dim);border-radius:10px;padding:5px 13px;font-size:12.5px}
+.add-t:hover{border-color:var(--accent);color:var(--text)}
+.tpick{display:flex;gap:8px;align-items:center;margin-top:10px}
+.terr{font-size:12px;color:var(--danger);margin-top:7px;min-height:16px}
+.thint{font-size:11.5px;color:var(--faint);margin-top:8px}
+.test-row{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.test-row span{font-size:12.5px;color:var(--dim)}
+
+/* Telegram */
+.tg{background:var(--tg);border-radius:18px;padding:12px;border:1px solid var(--border);box-shadow:var(--shadow);background-image:radial-gradient(circle at 20% 0%,rgba(80,120,200,.18),transparent 55%)}
+.tg-h{display:flex;align-items:center;gap:10px;padding:5px 5px 11px;border-bottom:1px solid #1c2a38;margin-bottom:12px}
+.tg-av{width:36px;height:36px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff;flex:none}
+.tg-av svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tg-n{font-size:13.5px;font-weight:650;color:var(--tg-t)}
+.tg-s{font-size:11px;color:#6b8bab}
+.tg-msgs{max-height:560px;overflow:auto;display:grid;gap:8px;padding-right:2px}
+.bub{background:var(--tg-b);border-radius:14px 14px 14px 4px;padding:9px 12px 7px;max-width:96%;justify-self:start;animation:pop .35s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+.bub .tx{font-size:13px;color:var(--tg-t);line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.bub .tx b{font-weight:700}
+.bub .mt{display:flex;justify-content:flex-end;gap:5px;margin-top:3px;font-size:10px;color:#6b8bab}
+.bub .mt em{font-style:normal;color:#5fb0ff}
+.tg-empty{color:#6b8bab;font-size:12.5px;padding:24px 10px;text-align:center}
+.tg-tag{font-size:10.5px;color:var(--warn);text-align:center;margin-top:8px}
+
+/* ---------- Отчёты ---------- */
+.drop{border:1.5px dashed var(--border2);border-radius:16px;padding:34px 20px;text-align:center;transition:.2s;background:var(--p2);cursor:pointer}
+.drop:hover,.drop.over{border-color:var(--accent);background:rgba(123,108,255,.1)}
+.drop .ic{width:50px;height:50px;border-radius:15px;display:grid;place-items:center;margin:0 auto 12px;background:var(--grad);color:#fff;box-shadow:0 10px 26px -10px rgba(177,87,240,.9)}
+.drop .ic svg{width:24px;height:24px}
+.drop b{font-size:15px}
+.drop p{margin:5px 0 0;color:var(--dim);font-size:12.5px}
+.res{display:grid;gap:8px;margin-top:14px}
+.res-i{padding:10px 14px;border-radius:12px;background:var(--p2);border:1px solid var(--border);font-size:12.5px;animation:fade .3s both}
+.res-i .hd{font-weight:700;margin-bottom:2px}
+.res-i.ok .hd{color:var(--ok)} .res-i.err .hd{color:var(--danger)}
+.res-i .dt{color:var(--dim)}
+.prog{height:5px;border-radius:99px;background:var(--p3);overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--grad);width:0;transition:width .25s}
+.st2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.st-l{font-size:13px;line-height:1.9;color:var(--dim)}
+.st-l b{color:var(--text)}
+.st-l details summary{cursor:pointer;color:var(--text);margin-top:6px}
+.st-l ul{margin:6px 0 0;padding-left:18px;max-height:140px;overflow:auto}
+
+/* ---------- Drawer / Modal / Toast ---------- */
+.veil{position:fixed;inset:0;z-index:80;background:rgba(4,6,14,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:.25s}
+.veil.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(560px,100vw);z-index:90;background:var(--panel-solid);border-left:1px solid var(--border2);box-shadow:-30px 0 80px -30px rgba(0,0,0,.7);transform:translateX(102%);transition:transform .32s cubic-bezier(.2,.8,.2,1);overflow:auto;padding:24px 26px 40px}
+.drawer.on{transform:none}
+.dr-x{position:absolute;right:16px;top:16px}
+.dr-t{font-size:21px;font-weight:760;letter-spacing:-.025em;margin:0 40px 2px 0}
+.dr-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.dr-g>div{padding:11px 13px;border-radius:13px;background:var(--p2);border:1px solid var(--border)}
+.dr-g .l{font-size:11px;color:var(--dim);font-weight:600}
+.dr-g .v{font-size:18px;font-weight:750;letter-spacing:-.02em;margin-top:2px}
+.dr-s{font-size:11px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);margin:22px 0 10px}
+.modal{position:fixed;left:50%;top:14vh;transform:translate(-50%,-14px) scale(.98);width:min(640px,calc(100vw - 28px));z-index:95;background:var(--panel-solid);border:1px solid var(--border2);border-radius:20px;box-shadow:0 40px 100px -30px rgba(0,0,0,.8);opacity:0;pointer-events:none;transition:.22s;overflow:hidden}
+.modal.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.modal.about{top:8vh;max-height:84vh;overflow:auto;padding:28px 30px}
+.cmd-in{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--border)}
+.cmd-in input{flex:1;background:none;border:0;outline:none;font-size:16px}
+.cmd-in input::placeholder{color:var(--faint)}
+.cmd-list{max-height:min(52vh,420px);overflow:auto;padding:8px}
+.cmd-g{font-size:10.5px;color:var(--faint);font-weight:750;text-transform:uppercase;letter-spacing:.08em;padding:10px 12px 4px}
+.cmd-i{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:13.5px}
+.cmd-i.sel{background:var(--p3)}
+.cmd-i .d{margin-left:auto;font-size:11.5px;color:var(--dim)}
+.cmd-f{display:flex;gap:16px;padding:10px 18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--faint)}
+.pop{position:absolute;right:24px;top:100%;margin-top:8px;width:340px;max-width:calc(100vw - 28px);z-index:50;padding:16px 18px;display:none;background:var(--panel-solid)}
+.pop.on{display:block;animation:fade .2s both}
+.pop .field{margin-bottom:12px}
+.pop .hint{font-size:11px;color:var(--faint);margin-top:4px}
+.toasts{position:fixed;right:20px;bottom:20px;z-index:120;display:grid;gap:8px;justify-items:end}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:13px;background:var(--panel-solid);border:1px solid var(--border2);box-shadow:0 18px 44px -14px rgba(0,0,0,.65);font-size:13px;font-weight:550;animation:pop .35s cubic-bezier(.2,1.2,.4,1) both;max-width:min(420px,calc(100vw - 40px))}
+.toast.out{opacity:0;transform:translateY(8px);transition:.3s}
+.toast i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok);font-style:normal;font-size:12px;flex:none}
+.toast.warn i{background:var(--warn-bg);color:var(--warn)}
+.foot{max-width:1440px;margin:0 auto;padding:0 24px 40px;color:var(--faint);font-size:12px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.foot a,.foot button{color:var(--dim);background:none;border:0;padding:0;text-decoration:underline;text-underline-offset:3px;font-size:12px}
+.foot a:hover,.foot button:hover{color:var(--text)}
+.ab-h{font-size:22px;font-weight:780;letter-spacing:-.025em;margin:0 0 6px}
+.ab-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.ab-g>div{padding:12px 14px;border-radius:13px;background:var(--p2);border:1px solid var(--border);font-size:12.5px;color:var(--dim);line-height:1.5}
+.ab-g b{display:block;color:var(--text);font-size:13px;margin-bottom:2px}
+.ab-tech{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+
+/* ---------- Адаптив ---------- */
+@media (max-width:1180px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ov-row,.ov-row2{grid-template-columns:minmax(0,1fr)}
+  .set-layout,.plan-layout{grid-template-columns:minmax(0,1fr)}
+  .sticky-p,.sticky-sum{position:static}
+}
+@media (max-width:860px){
+  .fav-grid{grid-template-columns:minmax(0,1fr)}
+  .prow{grid-template-columns:1fr auto;gap:10px}
+  .prow .chips{grid-column:1/-1;order:3}
+  .prow .sp{display:none}
+  .sync-info{display:none}
+  .topbar-in{flex-wrap:wrap;gap:10px}
+}
+@media (max-width:640px){
+  .topbar-in{padding:10px 14px}.tabs-wrap{padding:0 14px 10px}
+  main{padding:16px 14px 60px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi .val{font-size:22px}
+  .kpi.wide{grid-column:1/-1}
+  .pc-body{grid-template-columns:1fr}
+  .pc-nums{grid-template-columns:repeat(2,auto)}
+  .pcard{padding:16px}
+  .brand .sub,.btn .tx-hide{display:none}
+  .pg-r{grid-template-columns:22px minmax(0,1fr) 70px;gap:8px}
+  .pg-r .hid{display:none}
+  .st2,.ab-g{grid-template-columns:1fr}
+  .h2 h2{font-size:19px}
+  .dr-g{grid-template-columns:1fr 1fr}
+  .drawer{padding:20px 16px 40px}
+  .donut-wrap{justify-content:flex-start}
+  .attn-row{grid-template-columns:1fr auto}
+  .attn-row .pl{display:none}
+  .foot{padding:0 14px 30px}
+  .pop{right:14px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+.pc-body svg.spark{display:block;width:100%;height:54px}
+.prow .sp svg.spark{display:block;width:110px;height:32px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo" id="logo"></div>
+      <div>
+        <h1>Трекер остатков <span class="demo-chip">Демо</span></h1>
+        <div class="sub">Nordlane Home · Ozon &amp; Wildberries</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="top-actions">
+      <div class="sync-info" id="syncInfo"></div>
+      <button class="btn" data-act="open-cmd" aria-label="Поиск и команды">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><span class="tx-hide">Поиск</span> <kbd>Ctrl K</kbd>
+      </button>
+      <button class="btn" id="setBtn" data-act="settings" aria-label="Параметры расчёта">
+        <svg class="i" viewBox="0 0 24 24"><path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11M21 18h-1"/><circle cx="16" cy="6" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="18" cy="18" r="2.2"/></svg><span class="tx-hide">Параметры</span>
+      </button>
+      <button class="btn icon" id="themeBtn" data-act="theme" aria-label="Сменить тему"></button>
+      <button class="btn accent" id="syncBtn" data-act="sync">
+        <svg class="i" viewBox="0 0 24 24"><path d="M20 11a8 8 0 00-14.3-3.5M4 4v4h4M4 13a8 8 0 0014.3 3.5M20 20v-4h-4"/></svg><span class="tx-hide">Обновить</span>
+      </button>
+    </div>
+    <div class="card pop" id="settingsPop">
+      <div class="card-h" style="margin-bottom:12px"><h3>Параметры расчёта</h3><span class="save-note" id="setNote" style="margin:0"></span></div>
+      <div class="field"><label for="s-planning">Цикл, дней</label><input class="inp" id="s-planning" type="number" min="1" max="180" data-in="s-planning"><div class="hint">На сколько дней вперёд планируем запас</div></div>
+      <div class="field"><label for="s-wb">Плечо доставки WB, дней</label><input class="inp" id="s-wb" type="number" min="0" max="120" data-in="s-wb"><div class="hint">Сколько дней товар едет до склада WB</div></div>
+      <div class="field"><label for="s-oz">Плечо доставки Ozon, дней</label><input class="inp" id="s-oz" type="number" min="0" max="120" data-in="s-oz"><div class="hint">Сколько дней товар едет до склада Ozon</div></div>
+      <div class="hint" style="margin-bottom:12px">Изменения применяются сразу: «К заказу», план поставок и алерты пересчитываются.</div>
+      <button class="btn accent sm" data-act="save-settings">Готово</button>
+    </div>
+  </div>
+  <div class="tabs-wrap"><nav class="tabs" id="tabs" aria-label="Разделы"></nav></div>
+</header>
+
+<main><section id="view" class="view"></section></main>
+
+<footer class="foot">
+  <span>Демо-версия. Магазин, артикулы и показатели вымышлены, данные генерируются в браузере.</span>
+  <span><button data-act="open-about">О проекте</button> · <button data-act="reset">Сбросить демо</button></span>
+</footer>
+
+<div class="veil" id="veil" data-act="close"></div>
+<aside class="drawer" id="drawer" aria-label="Карточка товара"></aside>
+<div class="modal" id="cmd" role="dialog" aria-label="Поиск и команды">
+  <div class="cmd-in"><svg class="i" viewBox="0 0 24 24" style="width:20px;height:20px;color:var(--dim)"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/></svg><input id="cmdIn" placeholder="Артикул, раздел или действие…" autocomplete="off" spellcheck="false"></div>
+  <div class="cmd-list" id="cmdList"></div>
+  <div class="cmd-f"><span>↑↓ выбор</span><span>Enter открыть</span><span>Esc закрыть</span></div>
+</div>
+<div class="modal about" id="about" role="dialog" aria-label="О проекте"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Трекер остатков — демо. Все данные сгенерированы, магазин и товары
+   вымышлены. Вместо серверного API работает локальный слой данных.
+   ===================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const fmt = (n, d = 0) => n == null || isNaN(n) ? '—' : new Intl.NumberFormat('ru-RU', { maximumFractionDigits: d }).format(n);
+const money = n => n == null ? '—' : fmt(Math.round(n)) + ' ₽';
+const compactMoney = n => n == null ? '—' : n >= 1e6 ? fmt(n / 1e6, 2) + ' млн ₽' : n >= 1e4 ? fmt(n / 1e3, 1) + ' тыс ₽' : fmt(Math.round(n)) + ' ₽';
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const plural = (n, a, b, c) => { const m = Math.abs(n) % 100, k = m % 10; return m > 10 && m < 20 ? c : k > 1 && k < 5 ? b : k === 1 ? a : c; };
+const DAY_MS = 86400000;
+
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const rng = mulberry32(20261011);
+
+const MP_LABEL = { wb: 'WB', ozon: 'Ozon' };
+const DAYS = 124;
+const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+const dayDate = i => new Date(TODAY.getTime() - (DAYS - i) * DAY_MS);       // i = DAYS-1 -> вчера
+const dShort = d => d.toLocaleDateString('ru', { day: 'numeric', month: 'short' }).replace('.', '');
+
+/* ---------- Склады ---------- */
+const WAREHOUSES = [
+  { id: 101, mp: 'wb', name: 'Коледино', short: 'Коледино', share: .26 },
+  { id: 102, mp: 'wb', name: 'Электросталь', short: 'Электросталь', share: .17 },
+  { id: 103, mp: 'wb', name: 'Казань', short: 'Казань', share: .13 },
+  { id: 104, mp: 'wb', name: 'Краснодар', short: 'Краснодар', share: .12 },
+  { id: 105, mp: 'wb', name: 'Екатеринбург (Кольцово)', short: 'Екб', share: .10 },
+  { id: 106, mp: 'wb', name: 'Санкт-Петербург (Шушары)', short: 'СПб', share: .10 },
+  { id: 107, mp: 'wb', name: 'Новосибирск', short: 'Новосиб.', share: .06 },
+  { id: 108, mp: 'wb', name: 'Невинномысск', short: 'Невинн.', share: .06 },
+  { id: 201, mp: 'ozon', name: 'Москва, МО и Дальние регионы', short: 'Москва/МО', share: .40 },
+  { id: 202, mp: 'ozon', name: 'Санкт-Петербург и СЗО', short: 'СПб/СЗО', share: .14 },
+  { id: 203, mp: 'ozon', name: 'Юг', short: 'Юг', share: .13 },
+  { id: 204, mp: 'ozon', name: 'Поволжье', short: 'Поволжье', share: .12 },
+  { id: 205, mp: 'ozon', name: 'Урал', short: 'Урал', share: .09 },
+  { id: 206, mp: 'ozon', name: 'Сибирь', short: 'Сибирь', share: .07 },
+  { id: 207, mp: 'ozon', name: 'Дальний Восток', short: 'ДВ', share: .05 },
+];
+const WH_BY_ID = Object.fromEntries(WAREHOUSES.map(w => [w.id, w]));
+const FBS_WH = [
+  { id: 301, name: 'Основной склад · Подольск', main: true },
+  { id: 302, name: 'Подсклад · Казань' },
+  { id: 303, name: 'Подсклад · Екатеринбург' },
+  { id: 304, name: 'Подсклад · Краснодар' },
+  { id: 305, name: 'Подсклад · Новосибирск' },
+];
+
+/* ---------- Товары (вымышленный магазин Nordlane Home) ---------- */
+const PROD_SEED = [
+  // артикул, название, цена, заказы/сутки WB, Ozon, ДРР, в избранном
+  ['NL-KETTLE-1700', 'Чайник электрический 1.7 л, стекло', 2490, 46, 31, .09, 1],
+  ['NL-BLENDER-600', 'Блендер погружной 600 Вт', 3190, 28, 34, .11, 1],
+  ['NL-GRINDER-CF', 'Кофемолка электрическая, нож из нержавейки', 1790, 22, 15, .08, 1],
+  ['NL-MUG-THERMO-450', 'Термокружка 450 мл, вакуумная', 1290, 61, 48, .07, 1],
+  ['NL-SCALE-KT', 'Весы кухонные электронные до 5 кг', 990, 38, 26, .12, 1],
+  ['NL-LUNCHBOX-2', 'Ланчбокс двухсекционный с приборами', 890, 33, 29, .10, 1],
+  ['NL-KNIFESET-6', 'Набор кухонных ножей, 6 предметов', 3490, 12, 16, .13, 0],
+  ['NL-PAN-28', 'Сковорода с антипригарным покрытием 28 см', 2290, 19, 23, .10, 0],
+  ['NL-ORGANIZER-S', 'Органайзер для специй, 12 баночек', 1590, 17, 0, .09, 0],
+  ['NL-FROTHER-USB', 'Вспениватель для молока, USB', 1190, 24, 18, .11, 0],
+  ['NL-TOASTER-2', 'Тостер на 2 ломтика', 2790, 9, 14, .14, 0],
+  ['NL-JUICER-SLOW', 'Соковыжималка шнековая', 5990, 0, 7, .15, 0],
+  ['NL-BOTTLE-750', 'Бутылка для воды 750 мл, тритан', 690, 52, 0, .06, 0],
+  ['NL-MIXER-HAND', 'Миксер ручной, 5 скоростей', 2190, 13, 11, .12, 0],
+];
+/* сценарии остатков, чтобы в демо были и критичные позиции, и затоваренность (запас в днях) */
+const COVER_OVR = {
+  'NL-MUG-THERMO-450:wb': { all: [3, 7] },
+  'NL-BLENDER-600:ozon': { all: [4, 9] },
+  'NL-KETTLE-1700:wb': { wh: { 101: [2.4, 3.2], 102: [4, 5.5], 103: [6, 9] } },
+  'NL-TOASTER-2:ozon': { all: [3, 6] },
+  'NL-SCALE-KT:wb': { all: [9, 16] },
+  'NL-SCALE-KT:ozon': { wh: { 201: [5, 6.5] } },
+  'NL-ORGANIZER-S:wb': { all: [85, 120] },
+  'NL-PAN-28:ozon': { wh: { 202: [3.5, 5], 204: [6, 8] } },
+  'NL-LUNCHBOX-2:ozon': { all: [48, 70] },
+};
+const DOW = [1.12, .96, .98, 1.0, 1.02, 1.06, 1.14]; // вс..сб
+const DEFAULT_SEL = { wb: [101, 102, 103, 104, 105], ozon: [201, 202, 203, 204] };
+
+/* ---------- Каталог метрик ----------
+   agg: sum | avg | last, better: up | down, excl: только один МП, ratio: считаем сами */
+const METRICS = [
+  { key: 'card_views', label: 'Показы карточки', unit: 'number', group: 'Воронка', agg: 'sum' },
+  { key: 'card_clicks', label: 'Переходы в карточку', unit: 'number', group: 'Воронка', agg: 'sum' },
+  { key: 'add_to_basket', label: 'Добавления в корзину', unit: 'number', group: 'Воронка', agg: 'sum' },
+  { key: 'orders_amount', label: 'Заказы, шт.', unit: 'number', group: 'Воронка', agg: 'sum' },
+  { key: 'orders_sum', label: 'Заказы, руб.', unit: 'money', group: 'Воронка', agg: 'sum' },
+  { key: 'sales_amount', label: 'Продажи, шт.', unit: 'number', group: 'Воронка', agg: 'sum' },
+  { key: 'sales_sum', label: 'Продажи, руб.', unit: 'money', group: 'Воронка', agg: 'sum' },
+  { key: 'buyout_pct', label: 'Процент выкупа', hint: 'продажи / заказы × 100', unit: 'percent', group: 'Воронка', ratio: ['sales_amount', 'orders_amount', 100], tag: 'расчёт' },
+  { key: 'search_position', label: 'Средняя позиция в поиске', hint: 'чем меньше, тем лучше', unit: 'number', group: 'Воронка', agg: 'avg', better: 'down', excl: 'ozon' },
+  { key: 'stocks_amount', label: 'Остаток FBO, шт.', unit: 'number', group: 'Остатки', agg: 'last' },
+  { key: 'stocks_amount_fbs', label: 'Остаток FBS, шт.', unit: 'number', group: 'Остатки', agg: 'last', excl: 'wb' },
+  { key: 'stocks_in_transit', label: 'Товары в пути, шт.', unit: 'number', group: 'Остатки', agg: 'last' },
+  { key: 'adv_sum', label: 'Расходы на рекламу', unit: 'money', group: 'Реклама', agg: 'sum', better: 'down' },
+  { key: 'orders_sum_adv', label: 'Заказы по РК, руб.', unit: 'money', group: 'Реклама', agg: 'sum' },
+  { key: 'card_clicks_adv', label: 'Клики по рекламе', unit: 'number', group: 'Реклама', agg: 'sum' },
+  { key: 'drr_pct', label: 'ДРР, %', hint: 'расходы на рекламу / заказы × 100', unit: 'percent', group: 'Реклама', ratio: ['adv_sum', 'orders_sum', 100], better: 'down', tag: 'расчёт' },
+  { key: 'price_after_spp', label: 'Цена с СПП, руб', unit: 'money', group: 'Цены', agg: 'avg' },
+  { key: 'spp_percent', label: 'СПП, %', unit: 'percent', group: 'Цены', agg: 'avg' },
+  { key: 'price_with_card', label: 'Цена с картой Ozon, руб', unit: 'money', group: 'Цены', agg: 'avg', excl: 'ozon' },
+  { key: 'profit_sum', label: 'Прибыль', unit: 'money', group: 'Прибыль', agg: 'sum' },
+  { key: 'conv_to_order_pct', label: 'Конверсия в заказ, %', hint: 'заказы / корзина × 100', unit: 'percent', group: 'Свои метрики', ratio: ['orders_amount', 'add_to_basket', 100], tag: 'наш расчёт' },
+  { key: 'avg_velocity', label: 'Средняя скорость продаж, шт/сутки', hint: 'сумма заказов за период / число дней', unit: 'number', group: 'Свои метрики', perDay: 'orders_amount', tag: 'наш расчёт' },
+  { key: 'fbs_velocity', label: 'Скорость расхода FBS, шт/сутки', hint: 'дельта остатка FBS по дням', unit: 'number', group: 'Свои метрики', agg: 'avg', excl: 'wb', tag: 'наш расчёт' },
+];
+const METRIC = Object.fromEntries(METRICS.map(m => [m.key, m]));
+const GROUP_ORDER = ['Свои метрики', 'Воронка', 'Остатки', 'Реклама', 'Цены', 'Прибыль'];
+
+/* ---------- Генерация ---------- */
+function genSeries(base, price, drr, mp, stockNow, fbsNow) {
+  const S = {}; const keys = ['card_views', 'card_clicks', 'add_to_basket', 'orders_amount', 'orders_sum', 'sales_amount', 'sales_sum', 'adv_sum', 'orders_sum_adv', 'card_clicks_adv', 'price_after_spp', 'spp_percent', 'profit_sum', 'stocks_amount', 'stocks_in_transit', 'search_position', 'price_with_card', 'stocks_amount_fbs', 'fbs_velocity'];
+  keys.forEach(k => S[k] = new Array(DAYS).fill(0));
+  const trendEnd = .82 + rng() * .5;
+  const promo = [[Math.floor(rng() * 30 + 18), 5], [Math.floor(rng() * 30 + 72), 6]];
+  const convBO = .34 + rng() * .18, ctr = .062 + rng() * .02, vtoc = .14 + rng() * .05;
+  const sppBase = mp === 'wb' ? 17 + rng() * 9 : 5 + rng() * 6;
+  let sales = [];
+  for (let i = 0; i < DAYS; i++) {
+    const dt = dayDate(i);
+    const p = promo.some(([s, l]) => i >= s && i < s + l) ? 1.38 : 1;
+    const tr = 1 + (trendEnd - 1) * (i / DAYS);
+    const o = Math.max(0, Math.round(base * DOW[dt.getDay()] * tr * p * (.8 + rng() * .4)));
+    const spp = sppBase + Math.sin(i / 16) * 1.6 + (rng() - .5) * .8;
+    const before = price * (1 + Math.sin(i / 30) * .015);
+    const after = before * (1 - spp / 100);
+    const sa = Math.round(o * (.82 + rng() * .08));
+    const basket = o / convBO * (.94 + rng() * .12);
+    const clicks = basket / vtoc;
+    const views = clicks / ctr;
+    const ordSum = o * after;
+    const adv = ordSum * drr * (.8 + rng() * .4);
+    S.orders_amount[i] = o; S.orders_sum[i] = ordSum; S.sales_amount[i] = sa; S.sales_sum[i] = sa * after;
+    S.add_to_basket[i] = Math.round(basket); S.card_clicks[i] = Math.round(clicks); S.card_views[i] = Math.round(views);
+    S.adv_sum[i] = adv; S.orders_sum_adv[i] = ordSum * (.3 + rng() * .1); S.card_clicks_adv[i] = Math.round(clicks * (.26 + rng() * .08));
+    S.price_after_spp[i] = after; S.spp_percent[i] = spp; S.price_with_card[i] = mp === 'ozon' ? after * .97 : 0;
+    S.profit_sum[i] = sa * after * .31 - adv * .9;
+    S.search_position[i] = mp === 'ozon' ? 14 + Math.sin(i / 11) * 5 + rng() * 5 : 0;
+    sales.push(sa);
+  }
+  // остаток: идём от текущего значения назад
+  S.stocks_amount[DAYS - 1] = stockNow;
+  for (let i = DAYS - 2; i >= 0; i--) S.stocks_amount[i] = Math.max(0, Math.round(S.stocks_amount[i + 1] + sales[i + 1] - (rng() < .06 ? base * 18 : 0)));
+  for (let i = 0; i < DAYS; i++) S.stocks_in_transit[i] = Math.round(base * (3 + rng() * 9));
+  if (mp === 'wb') {
+    S.stocks_amount_fbs[DAYS - 1] = fbsNow;
+    for (let i = DAYS - 2; i >= 0; i--) S.stocks_amount_fbs[i] = Math.max(0, Math.round(S.stocks_amount_fbs[i + 1] + base * .35 * (.4 + rng() * 1.2) - (rng() < .07 ? base * 6 : 0)));
+    for (let i = 1; i < DAYS; i++) S.fbs_velocity[i] = Math.max(0, S.stocks_amount_fbs[i - 1] - S.stocks_amount_fbs[i]) * .6 + base * .25;
+  }
+  return S;
+}
+
+function buildData() {
+  const products = PROD_SEED.map(([article, name, price, wbB, ozB, drr, fav], idx) => {
+    const P = { id: idx + 1, article, name, price, fav: !!fav, wb: null, ozon: null, fbs: null };
+    ['wb', 'ozon'].forEach(mp => {
+      const base = mp === 'wb' ? wbB : ozB;
+      if (!base) return;
+      const wh = {}; let stockTotal = 0;
+      WAREHOUSES.filter(w => w.mp === mp).forEach(w => {
+        const ds = Math.max(.3, base * w.share * (.84 + rng() * .32));
+        const r = rng(); const ov = COVER_OVR[article + ':' + mp];
+        const rngIn = a => a[0] + rng() * (a[1] - a[0]);
+        const cover = ov && ov.all ? rngIn(ov.all) : ov && ov.wh && ov.wh[w.id] ? rngIn(ov.wh[w.id]) : r < .1 ? 3 + rng() * 5 : r < .32 ? 9 + rng() * 12 : 25 + rng() * 45;
+        const stock = Math.round(ds * cover);
+        wh[w.id] = { id: w.id, name: w.name, ds: Math.round(ds * 10) / 10, orders: Math.round(ds * 1.14 * 10) / 10, stock };
+        stockTotal += stock;
+      });
+      P[mp] = { base, wh, sel: [...DEFAULT_SEL[mp]], sx: null };
+    });
+    if (P.wb) {
+      const mainStock = Math.round(P.wb.base * (6 + rng() * 9));
+      const subs = FBS_WH.slice(1).map(w => {
+        const st = Math.round(P.wb.base * (.1 + rng() * .7) * (rng() < .3 ? .1 : 1) * (w.id === 302 ? 1.2 : .8) * 3);
+        return { id: w.id, name: w.name, stock: st, delta: Math.round((rng() - .55) * 22) };
+      });
+      P.fbs = { main: { id: 301, name: FBS_WH[0].name, stock: mainStock }, subs };
+      P.fbsTotal = mainStock + subs.reduce((s, x) => s + x.stock, 0);
+    }
+    ['wb', 'ozon'].forEach(mp => {
+      if (!P[mp]) return;
+      const stockNow = Object.values(P[mp].wh).reduce((s, w) => s + w.stock, 0);
+      P[mp].series = genSeries(P[mp].base, price, drr, mp, stockNow, P.fbsTotal || 0);
+    });
+    return P;
+  });
+  return products;
+}
+const PRODUCTS = buildData();
+const PBY = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
+
+/* ---------- Персистентность (localStorage с защитой) ---------- */
+const LS_KEY = 'nl-stock-tracker-demo-v2';
+const STATE_DEFAULT = () => ({
+  theme: 'dark',
+  settings: { planning_days: 30, lead_time_wb: 12, lead_time_ozon: 18 },
+  period: 7, ovPeriod: 30,
+  favs: PRODUCTS.filter(p => p.fav).map(p => p.id),
+  sel: Object.fromEntries(PRODUCTS.map(p => [p.id, { wb: p.wb ? [...p.wb.sel] : [], ozon: p.ozon ? [...p.ozon.sel] : [] }])),
+  metrics: ['orders_amount', 'orders_sum', 'conv_to_order_pct', 'adv_sum', 'drr_pct'],
+  bot: { username: 'nordlane_stock_bot', masked: '7312840••••:AAH••••••••••••••••••••••', chats: ['100200300', '100200301'] },
+  alerts: {
+    daily: { enabled: true, time: '09:00', stock: true, details: true, regions: true, metrics: ['orders_amount', 'conv_to_order_pct'] },
+    intraday: { enabled: true, threshold: 5, channels: ['wb', 'ozon'], times: ['12:00', '16:00', '20:00'] },
+    fbs: { enabled: true, time: '10:30', main: 301, def: 10, products: {} },
+  },
+  reports: { ozon: { file: 'Доступность товаров_demo.xlsx', at: Date.now() - 3 * 3600e3 - 21 * 60e3, matched: 9, unmatched: 0 }, wb: { file: 'supplier-goods-demo-week.xlsx', at: Date.now() - 26 * 3600e3, matched: 8, unmatched: 2, unm: ['NL-OLD-KETTLE-1500', 'NL-SAMPLE-X'] } },
+});
+let S = STATE_DEFAULT();
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY); if (!raw) return;
+    const j = JSON.parse(raw); const d = STATE_DEFAULT();
+    S = { ...d, ...j, settings: { ...d.settings, ...j.settings }, bot: { ...d.bot, ...j.bot }, alerts: { daily: { ...d.alerts.daily, ...(j.alerts || {}).daily }, intraday: { ...d.alerts.intraday, ...(j.alerts || {}).intraday }, fbs: { ...d.alerts.fbs, ...(j.alerts || {}).fbs } }, reports: { ...d.reports, ...j.reports } };
+    S.favs = S.favs.filter(id => PBY[id]);
+    PRODUCTS.forEach(p => { if (!S.sel[p.id]) S.sel[p.id] = d.sel[p.id]; });
+  } catch (e) { S = STATE_DEFAULT(); }
+}
+let saveT;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { } }, 150); }
+function resetDemo() { try { localStorage.removeItem(LS_KEY); } catch (e) { } location.reload(); }
+load();
+
+/* ---------- Расчёты ---------- */
+const leadFor = mp => mp === 'wb' ? S.settings.lead_time_wb : S.settings.lead_time_ozon;
+function recOrder(w, mp) {
+  const need = w.ds * (S.settings.planning_days + leadFor(mp)) - w.stock;
+  if (need <= 0.5) return 0;
+  const step = need > 25 ? 5 : 1; return Math.ceil(need / step) * step;
+}
+const turnDays = w => w.ds > 0 ? Math.round(w.stock / w.ds * 10) / 10 : null;
+function turnClass(d) { return d == null ? 'amber' : d < 7 ? 'red' : d < 21 ? 'amber' : 'green'; }
+function turnPill(d, long) { return d == null ? '<span class="pill amber">нет продаж</span>' : `<span class="pill ${turnClass(d)}">${fmt(d, 1)} дн.</span>`; }
+function selWh(p, mp) { const m = p[mp]; if (!m) return []; return (S.sel[p.id][mp] || []).map(id => m.wh[id]).filter(Boolean); }
+function allWh(p, mp) { return p[mp] ? Object.values(p[mp].wh) : []; }
+
+function groupSummary(p, whFn = selWh) {
+  const r = { stock: 0, ds: 0, stockBy: { wb: 0, ozon: 0 }, rec: 0 };
+  ['wb', 'ozon'].forEach(mp => whFn(p, mp).forEach(w => { r.stock += w.stock; r.ds += w.ds; r.stockBy[mp] += w.stock; r.rec += recOrder(w, mp); }));
+  r.turn = r.ds > 0 ? Math.round(r.stock / r.ds * 10) / 10 : null;
+  r.fbs = p.fbsTotal || 0;
+  r.runwayDate = r.turn != null ? new Date(TODAY.getTime() + r.turn * DAY_MS) : null;
+  return r;
+}
+function mpSummary(p, mp, whFn = selWh) {
+  const rows = whFn(p, mp); const stock = rows.reduce((s, w) => s + w.stock, 0), ds = rows.reduce((s, w) => s + w.ds, 0);
+  return { stock, ds, turn: ds > 0 ? Math.round(stock / ds * 10) / 10 : null, rec: rows.reduce((s, w) => s + recOrder(w, mp), 0), n: rows.length };
+}
+function statusOf(turn) { return turn == null ? ['gray', 'Нет данных'] : turn < 7 ? ['red', 'Критично'] : turn < 21 ? ['amber', 'Пополнить'] : ['green', 'В норме']; }
+
+/* значение метрики для одного МП за диапазон [from..to] включительно */
+function mpMetric(P, mp, key, from, to) {
+  const m = METRIC[key]; const e = P[mp]; if (!e) return null;
+  if (m.excl && m.excl !== mp) return null;
+  if (m.ratio) { const a = mpMetric(P, mp, m.ratio[0], from, to), b = mpMetric(P, mp, m.ratio[1], from, to); return a == null || !b ? null : a / b * m.ratio[2]; }
+  if (m.perDay) { const v = mpMetric(P, mp, m.perDay, from, to); return v == null ? null : v / (to - from + 1); }
+  const arr = e.series[key]; if (!arr) return null;
+  if (m.agg === 'last') return arr[to];
+  let s = 0; for (let i = from; i <= to; i++) s += arr[i];
+  return m.agg === 'avg' ? s / (to - from + 1) : s;
+}
+/* агрегат по группе товаров и обоим МП */
+function groupMetric(list, key, from, to, onlyMp) {
+  const m = METRIC[key];
+  if (m.ratio) { const a = groupMetric(list, m.ratio[0], from, to, onlyMp), b = groupMetric(list, m.ratio[1], from, to, onlyMp); return a == null || !b ? null : a / b * m.ratio[2]; }
+  if (m.perDay) { const v = groupMetric(list, m.perDay, from, to, onlyMp); return v == null ? null : v / (to - from + 1); }
+  const vals = [];
+  list.forEach(P => ['wb', 'ozon'].forEach(mp => { if (onlyMp && onlyMp !== mp) return; const v = mpMetric(P, mp, key, from, to); if (v != null) vals.push(v); }));
+  if (!vals.length) return null;
+  const sum = vals.reduce((a, b) => a + b, 0);
+  return m.agg === 'avg' ? sum / vals.length : sum;
+}
+function dailySeries(list, key, from, to, onlyMp) {
+  const out = []; for (let i = from; i <= to; i++) { let s = 0; list.forEach(P => ['wb', 'ozon'].forEach(mp => { if (onlyMp && onlyMp !== mp) return; if (P[mp]) s += P[mp].series[key][i]; })); out.push(s); } return out;
+}
+function periodCmp(P, key, days) {
+  const cur = groupMetric([P], key, DAYS - days, DAYS - 1);
+  const prev = groupMetric([P], key, DAYS - 2 * days, DAYS - days - 1);
+  return { cur, prev };
+}
+function fmtMetric(v, unit) {
+  if (v == null) return '—';
+  if (unit === 'money') return money(v);
+  if (unit === 'percent') return fmt(v, 1) + '%';
+  return fmt(v, Math.abs(v) < 100 && v % 1 ? 1 : 0);
+}
+function deltaHtml(cur, prev, m, asPct) {
+  if (cur == null || prev == null) return '<span class="dpill neutral">—</span>';
+  const diff = cur - prev; if (Math.abs(diff) < 1e-9) return '<span class="dpill neutral">0</span>';
+  const good = (m && m.better === 'down') ? diff < 0 : diff > 0;
+  let txt;
+  if (asPct) txt = (diff > 0 ? '+' : '') + fmt(prev ? diff / Math.abs(prev) * 100 : 0, 1) + '%';
+  else { const s = m && m.unit === 'money' ? money(Math.abs(diff)) : fmtMetric(Math.abs(diff), m ? m.unit : 'number'); txt = (diff > 0 ? '+' : '−') + s; }
+  return `<span class="dpill ${good ? 'up' : 'down'}">${txt}</span>`;
+}
+/* =====================  UI-библиотека  ===================== */
+const ICONS = {
+  dash: '<rect x="3" y="3" width="7" height="9" rx="1.6"/><rect x="14" y="3" width="7" height="5" rx="1.6"/><rect x="14" y="12" width="7" height="9" rx="1.6"/><rect x="3" y="16" width="7" height="5" rx="1.6"/>',
+  star: '<path d="M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/>',
+  truck: '<path d="M2.5 6.5h11v10h-11zM13.5 9.5h4.2l3.3 3.3v3.7h-7.5z"/><circle cx="7" cy="18" r="1.9"/><circle cx="17" cy="18" r="1.9"/>',
+  sliders: '<path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11M21 18h-1"/><circle cx="16" cy="6" r="2.2"/><circle cx="10" cy="12" r="2.2"/><circle cx="18" cy="18" r="2.2"/>',
+  bell: '<path d="M6 9a6 6 0 1112 0c0 5 2 6.5 2 7.5H4c0-1 2-2.5 2-7.5z"/><path d="M10 20a2 2 0 004 0"/>',
+  file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+  sync: '<path d="M20 11a8 8 0 00-14.3-3.5M4 4v4h4M4 13a8 8 0 0014.3 3.5M20 20v-4h-4"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4-4"/>',
+  moon: '<path d="M20 14.5A8.5 8.5 0 119.5 4a7 7 0 0010.5 10.5z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2.4"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
+  download: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+  box: '<path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>',
+  bot: '<rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16.5h6"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+  arrowup: '<path d="M7 17L17 7M9 7h8v8"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+};
+const ic = (n, cls = '') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+const mpBadge = mp => `<span class="mp ${mp}">${MP_LABEL[mp] || mp.toUpperCase()}</span>`;
+
+/* ---------- Графики ---------- */
+let UID = 0;
+function smooth(pts) {
+  if (pts.length < 2) return '';
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2, t = .17;
+    d += `C${(p1[0] + (p2[0] - p0[0]) * t).toFixed(1)},${(p1[1] + (p2[1] - p0[1]) * t).toFixed(1)} ${(p2[0] - (p3[0] - p1[0]) * t).toFixed(1)},${(p2[1] - (p3[1] - p1[1]) * t).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+function niceMax(v) { if (v <= 0) return 1; const e = Math.pow(10, Math.floor(Math.log10(v))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
+function sparkline(data, color, w = 140, h = 44, fill = true) {
+  const id = 'sp' + (++UID); const mx = Math.max(...data), mn = Math.min(...data), rg = mx - mn || 1;
+  const pts = data.map((v, i) => [i / (data.length - 1) * w, h - 4 - (v - mn) / rg * (h - 10)]);
+  const line = smooth(pts);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="spark" style="overflow:visible"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".38"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>${fill ? `<path d="${line}L${w},${h}L0,${h}Z" fill="url(#${id})"/>` : ''}<path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+}
+const CHARTS = {};
+function chart(id, cfg) {
+  const W = cfg.w || 760, H = cfg.h || 270, L = 62, R = 12, T = 12, B = 28, iw = W - L - R, ih = H - T - B;
+  const n = cfg.labels.length, bars = cfg.type === 'bars';
+  const totals = cfg.labels.map((_, i) => cfg.stacked ? cfg.series.reduce((s, x) => s + x.data[i], 0) : Math.max(...cfg.series.map(x => x.data[i])));
+  const mx = niceMax(Math.max(...totals) * 1.04); const yf = v => T + ih - v / mx * ih;
+  const xf = i => bars ? L + (i + .5) * iw / n : L + i * iw / Math.max(1, n - 1);
+  let g = '', defs = '', body = '';
+  for (let k = 0; k <= 4; k++) { const v = mx / 4 * k, y = yf(v); g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="var(--border)" stroke-dasharray="${k ? '3 5' : ''}"/><text x="${L - 9}" y="${y + 4}" text-anchor="end" fill="var(--faint)" font-size="11">${(cfg.axis || (x => fmt(x)))(v)}</text>`; }
+  const every = Math.ceil(n / (cfg.ticks || 7));
+  cfg.labels.forEach((d, i) => { if (i % every === (n - 1) % every) g += `<text x="${xf(i)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : 'middle'}" fill="var(--faint)" font-size="11">${dShort(d)}</text>`; });
+  if (bars) {
+    const bw = Math.max(2, iw / n * .66);
+    cfg.labels.forEach((_, i) => { let acc = 0; cfg.series.forEach((s, si) => { const v = s.data[i], y0 = yf(acc), y1 = yf(acc + v); const top = si === cfg.series.length - 1; body += `<rect x="${xf(i) - bw / 2}" y="${y1}" width="${bw}" height="${Math.max(0, y0 - y1)}" rx="${top ? Math.min(3, bw / 2) : 0}" fill="${s.color}" opacity=".92"/>`; acc += v; }); });
+  } else {
+    cfg.series.forEach((s, si) => {
+      const pts = s.data.map((v, i) => [xf(i), yf(v)]); const line = smooth(pts);
+      defs += `<linearGradient id="${id}-g${si}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".34"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient>`;
+      body += `<path d="${line}L${xf(n - 1)},${yf(0)}L${xf(0)},${yf(0)}Z" fill="url(#${id}-g${si})"/><path d="${line}" fill="none" stroke="${s.color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+    });
+  }
+  const dots = cfg.series.map((s, si) => `<circle class="cd" data-s="${si}" r="4.5" cx="-20" cy="-20" opacity="0" fill="${s.color}" stroke="var(--panel-solid)" stroke-width="2"/>`).join('');
+  CHARTS[id] = { cfg, W, H, L, R, T, B, iw, ih, n, mx, bars, xf, yf, totals };
+  return `<div class="chartbox" data-chart="${id}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(cfg.title || 'График')}"><defs>${defs}</defs>${g}${body}<line class="cx" x1="-9" x2="-9" y1="${T}" y2="${T + ih}" stroke="var(--border2)" stroke-dasharray="4 4" opacity="0"/>${dots}<rect class="hit" x="${L}" y="0" width="${iw}" height="${H}" fill="transparent"/></svg><div class="chart-tip"></div></div>`;
+}
+function initCharts(root = document) {
+  $$('.chartbox', root).forEach(box => {
+    const C = CHARTS[box.dataset.chart]; if (!C) return;
+    const svg = $('svg', box), tip = $('.chart-tip', box), cx = $('.cx', box), dots = $$('.cd', box);
+    const move = ev => {
+      const r = svg.getBoundingClientRect(), sc = r.width / C.W; const px = ((ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left) / sc;
+      let i = C.bars ? Math.floor((px - C.L) / C.iw * C.n) : Math.round((px - C.L) / C.iw * (C.n - 1)); i = clamp(i, 0, C.n - 1);
+      const x = C.xf(i); cx.setAttribute('x1', x); cx.setAttribute('x2', x); cx.setAttribute('opacity', 1);
+      C.cfg.series.forEach((s, si) => { dots[si].setAttribute('opacity', C.bars ? 0 : 1); dots[si].setAttribute('cx', C.bars ? -20 : x); dots[si].setAttribute('cy', C.yf(C.cfg.stacked && !C.bars ? s.data[i] : s.data[i])); });
+      const f = C.cfg.tipFmt || (v => fmt(v));
+      tip.innerHTML = `<div class="d">${C.cfg.labels[i].toLocaleDateString('ru', { weekday: 'short', day: 'numeric', month: 'long' })}</div>` + C.cfg.series.map(s => `<div class="r"><span><i style="background:${s.color}"></i>${s.name}</span><b>${f(s.data[i])}</b></div>`).join('') + (C.cfg.stacked ? `<div class="r" style="border-top:1px solid var(--border);margin-top:5px;padding-top:5px"><span>Всего</span><b>${f(C.totals[i])}</b></div>` : '');
+      tip.style.opacity = 1;
+      const tw = tip.offsetWidth; let left = x * sc; left = clamp(left, tw / 2 + 4, r.width - tw / 2 - 4);
+      tip.style.left = left + 'px'; tip.style.top = Math.max(tip.offsetHeight + 6, C.yf(C.totals[i]) * sc - 10) + 'px';
+    };
+    const out = () => { tip.style.opacity = 0; cx.setAttribute('opacity', 0); dots.forEach(d => d.setAttribute('opacity', 0)); };
+    const hit = $('.hit', box); hit.addEventListener('mousemove', move); hit.addEventListener('touchmove', move, { passive: true }); hit.addEventListener('mouseleave', out); hit.addEventListener('touchend', out);
+  });
+}
+function donut(segs, size = 176) {
+  const r = 68, C = 2 * Math.PI * r, tot = segs.reduce((s, x) => s + x.v, 0) || 1; let acc = 0;
+  const arcs = segs.map(s => { const len = Math.max(0, s.v / tot * C - 4); const a = `<circle cx="88" cy="88" r="${r}" fill="none" stroke="${s.color}" stroke-width="17" stroke-linecap="round" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-acc - 2}"><title>${esc(s.label)}: ${fmt(s.v)}</title></circle>`; acc += s.v / tot * C; return a; }).join('');
+  return `<svg viewBox="0 0 176 176"><circle cx="88" cy="88" r="${r}" fill="none" stroke="var(--p3)" stroke-width="17"/>${arcs}</svg>`;
+}
+
+/* ---------- Анимация чисел ---------- */
+function fmtCount(v, f) { return f === 'money' ? compactMoney(v) : f === 'dec1' ? fmt(v, 1) : fmt(Math.round(v)); }
+function animateCounts(root = document) {
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  $$('[data-count]', root).forEach(el => {
+    const to = +el.dataset.count, f = el.dataset.f; if (reduce || isNaN(to)) { el.textContent = fmtCount(to, f); return; }
+    const t0 = performance.now(), dur = 700;
+    (function step(t) { const p = clamp((t - t0) / dur, 0, 1), e = 1 - Math.pow(1 - p, 3); el.textContent = fmtCount(to * e, f); if (p < 1) requestAnimationFrame(step); })(t0);
+  });
+}
+
+/* ---------- Тосты ---------- */
+function toast(msg, kind = 'ok') {
+  const box = $('#toasts'), el = document.createElement('div'); el.className = 'toast ' + kind;
+  el.innerHTML = `<i>${kind === 'warn' ? '!' : '✓'}</i><span>${msg}</span>`; box.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 3200);
+}
+
+/* ---------- Veil / drawer / modal ---------- */
+let veilCount = 0;
+function openLayer(el) { el.classList.add('on'); $('#veil').classList.add('on'); }
+function closeLayers() { $$('.drawer.on,.modal.on').forEach(e => e.classList.remove('on')); $('#veil').classList.remove('on'); }
+
+/* ---------- Палитра команд ---------- */
+let CMD = { items: [], sel: 0 };
+function cmdItems(q) {
+  q = q.trim().toLowerCase();
+  const items = [];
+  TABS.forEach(t => items.push({ g: 'Разделы', icon: t.icon, t: t.label, d: '', run: () => go(t.id) }));
+  items.push({ g: 'Действия', icon: 'sync', t: 'Обновить данные', d: 'синхронизация', run: () => doSync() });
+  items.push({ g: 'Действия', icon: S.theme === 'dark' ? 'sun' : 'moon', t: 'Сменить тему', d: S.theme === 'dark' ? 'светлая' : 'тёмная', run: () => toggleTheme() });
+  items.push({ g: 'Действия', icon: 'gear', t: 'Параметры расчёта', d: 'цикл, плечо доставки', run: () => toggleSettings(true) });
+  items.push({ g: 'Действия', icon: 'info', t: 'О проекте', d: 'стек и возможности', run: () => openAbout() });
+  PRODUCTS.forEach(p => items.push({ g: 'Товары', icon: 'box', t: p.article, d: p.name, run: () => openDrawer(p.id) }));
+  const f = q ? items.filter(i => (i.t + ' ' + i.d).toLowerCase().includes(q)) : items.filter(i => i.g !== 'Товары').concat(items.filter(i => i.g === 'Товары').slice(0, 5));
+  return f.slice(0, 14);
+}
+function renderCmd() {
+  const q = $('#cmdIn').value; CMD.items = cmdItems(q); CMD.sel = clamp(CMD.sel, 0, Math.max(0, CMD.items.length - 1));
+  let last = '', h = '';
+  CMD.items.forEach((it, i) => { if (it.g !== last) { h += `<div class="cmd-g">${it.g}</div>`; last = it.g; } h += `<div class="cmd-i ${i === CMD.sel ? 'sel' : ''}" data-act="cmd-run" data-i="${i}">${ic(it.icon)}<span>${esc(it.t)}</span><span class="d">${esc(it.d)}</span></div>`; });
+  $('#cmdList').innerHTML = h || '<div class="empty">Ничего не найдено</div>';
+  const s = $('.cmd-i.sel'); if (s) s.scrollIntoView({ block: 'nearest' });
+}
+function openCmd() { closeLayers(); openLayer($('#cmd')); $('#cmdIn').value = ''; CMD.sel = 0; renderCmd(); setTimeout(() => $('#cmdIn').focus(), 30); }
+function runCmd(i) { const it = CMD.items[i]; if (!it) return; closeLayers(); setTimeout(it.run, 60); }
+
+/* ---------- Чипы времени ---------- */
+const hm = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+function validateTimes(times) {
+  const s = [...times].sort(), bad = new Set();
+  for (const t of s) { const v = hm(t); if (v < 420 || v > 1320) bad.add(t); }
+  for (let i = 1; i < s.length; i++) if (hm(s[i]) - hm(s[i - 1]) < 60) { bad.add(s[i]); bad.add(s[i - 1]); }
+  if (s.length !== new Set(s).size) s.forEach(t => { if (s.filter(x => x === t).length > 1) bad.add(t); });
+  return { sorted: s, bad: [...bad], err: bad.size ? 'Окно проверок 07:00–22:00, между проверками минимум 1 час' : '' };
+}
+function timeChips(key, times, max, bad = []) {
+  const single = max === 1;
+  const chips = times.map(t => `<span class="tchip ${single ? 'edit' : ''} ${bad.includes(t) ? 'bad' : ''}" ${single ? `data-act="tc-open" data-key="${key}" title="Нажмите, чтобы изменить время"` : ''}>🕐 ${t}${single ? '' : `<button data-act="tc-del" data-key="${key}" data-t="${t}" aria-label="Удалить ${t}">✕</button>`}</span>`).join('');
+  const add = times.length < max ? `<button class="add-t" data-act="tc-open" data-key="${key}">${single ? '✎ Изменить время' : '+ Добавить время'}</button>` : '';
+  const pick = UI.tpick === key ? `<div class="tpick"><input class="inp" style="width:auto" type="time" id="tp-${key}" value="${single ? times[0] : '09:00'}"><button class="btn sm accent" data-act="tc-ok" data-key="${key}">${single ? 'Применить' : 'Добавить'}</button></div>` : '';
+  return `<div class="tchips">${chips}${add}</div>${pick}`;
+}
+/* =====================  Экраны  ===================== */
+const TABS = [
+  { id: 'overview', label: 'Обзор', icon: 'dash' },
+  { id: 'favorites', label: 'Избранное', icon: 'star', cnt: () => S.favs.length },
+  { id: 'products', label: 'Все товары', icon: 'grid', cnt: () => PRODUCTS.length },
+  { id: 'plan', label: 'Поставки', icon: 'truck' },
+  { id: 'metrics', label: 'Метрики карточки', icon: 'sliders' },
+  { id: 'alerts', label: 'Алерты', icon: 'bell' },
+  { id: 'reports', label: 'Отчёты об остатках', icon: 'file' },
+];
+const UI = {
+  tab: 'overview', open: new Set(), pk: new Set(), mg: new Set(['Свои метрики', 'Воронка']),
+  pf: { q: '', sort: 'orders', flt: 'all' }, plan: { scope: 'fav', mp: 'all', off: new Set() },
+  alert: 'daily', tpick: null, bad: [], sent: { daily: [], intraday: [], fbs: [] }, upl: null, pv: null, tok: false, lastSync: Date.now() - 7 * 60e3, syncing: false,
+};
+const COL = { wb: 'var(--wb)', ozon: 'var(--oz)', fbs: 'var(--fbs)' };
+const hexCol = { wb: '#bb63ff', ozon: '#4d92ff', fbs: '#ffb454' };
+
+/* ---------- Обзор ---------- */
+function renderOverview() {
+  const d = S.ovPeriod, cur = [DAYS - d, DAYS - 1], prv = [DAYS - 2 * d, DAYS - d - 1], A = PRODUCTS;
+  const sumC = groupMetric(A, 'orders_sum', ...cur), sumP = groupMetric(A, 'orders_sum', ...prv);
+  const ordC = groupMetric(A, 'orders_amount', ...cur), ordP = groupMetric(A, 'orders_amount', ...prv);
+  const dl = (c, p) => { if (!p) return ''; const x = (c - p) / p * 100; return `<span class="${x >= 0 ? 'up' : 'down'}">${x >= 0 ? '▲' : '▼'} ${fmt(Math.abs(x), 1)}%</span><span>к пред. ${d} дн.</span>`; };
+  let stWb = 0, stOz = 0, stFbs = 0, ds = 0, risk = 0, riskRec = 0, recAll = 0;
+  PRODUCTS.forEach(p => {
+    ['wb', 'ozon'].forEach(mp => { if (!p[mp]) return; const s = mpSummary(p, mp, allWh); if (mp === 'wb') stWb += s.stock; else stOz += s.stock; ds += s.ds; if (s.turn != null && s.turn < 7) risk++; });
+    stFbs += p.fbsTotal || 0;
+    const g = groupSummary(p); recAll += g.rec; riskRec += g.rec;
+  });
+  const turn = ds > 0 ? (stWb + stOz) / ds : null;
+  const sp30 = k => dailySeries(A, k, DAYS - 30, DAYS - 1);
+  const dates = []; for (let i = cur[0]; i <= cur[1]; i++) dates.push(dayDate(i));
+  const wbS = dailySeries(A, 'orders_sum', cur[0], cur[1], 'wb'), ozS = dailySeries(A, 'orders_sum', cur[0], cur[1], 'ozon');
+  const wbT = wbS.reduce((a, b) => a + b, 0), ozT = ozS.reduce((a, b) => a + b, 0);
+
+  // зона внимания
+  const att = [];
+  PRODUCTS.forEach(p => ['wb', 'ozon'].forEach(mp => selWh(p, mp).forEach(w => { const t = turnDays(w); if (t != null && t < 10 && w.ds >= 1.5) att.push({ p, mp, w, t, rec: recOrder(w, mp) }); })));
+  att.sort((a, b) => a.t - b.t);
+  const attHtml = att.slice(0, 6).map(a => `<div class="attn-row" data-act="drawer" data-pid="${a.p.id}"><div><div class="t">${mpBadge(a.mp)}${esc(a.p.article)}</div><div class="s">${esc(a.w.name)} · остаток ${a.w.stock} шт.</div></div><div class="pl">${turnPill(a.t)}</div><div class="need">к заказу<b>${a.rec} шт.</b></div></div>`).join('') || '<div class="empty">Критичных остатков нет</div>';
+
+  // топ товаров
+  const tops = PRODUCTS.map(p => ({ p, wb: groupMetric([p], 'orders_sum', ...cur, 'wb') || 0, oz: groupMetric([p], 'orders_sum', ...cur, 'ozon') || 0 })).sort((a, b) => (b.wb + b.oz) - (a.wb + a.oz)).slice(0, 6);
+  const topMax = tops[0].wb + tops[0].oz;
+  const topHtml = tops.map((t, i) => `<div class="top-row" data-act="drawer" data-pid="${t.p.id}"><span class="n">${i + 1}</span><div><div class="nm"><span>${esc(t.p.article)}</span><span>${compactMoney(t.wb + t.oz)}</span></div><div class="bar2" style="width:${(t.wb + t.oz) / topMax * 100}%;min-width:8%"><i style="width:${t.wb / (t.wb + t.oz || 1) * 100}%;background:${COL.wb}"></i><i style="flex:1;background:${COL.ozon}"></i></div></div></div>`).join('');
+
+  // тепловая карта
+  const head = WAREHOUSES.map(w => `<th class="${w.mp === 'wb' ? 'wbh' : 'ozh'}" title="${esc(w.name)}">${esc(w.short)}</th>`).join('');
+  const heat = PRODUCTS.map(p => `<tr><td class="rn" data-act="drawer" data-pid="${p.id}">${esc(p.article)}</td>${WAREHOUSES.map(w => { const e = p[w.mp] && p[w.mp].wh[w.id]; if (!e) return '<td class="c hm-n">·</td>'; const t = turnDays(e); const cls = t == null ? 'hm-n' : t < 7 ? 'hm-r' : t < 21 ? 'hm-a' : 'hm-g'; return `<td class="c ${cls}" title="${esc(p.article)} · ${esc(w.name)}: остаток ${e.stock} шт., оборот ${t == null ? '—' : fmt(t, 1) + ' дн.'}">${t == null ? '—' : t > 99 ? '99+' : Math.round(t)}</td>`; }).join('')}</tr>`).join('');
+
+  return `
+  <div class="h2"><div><h2>Обзор</h2><p>Сводка по всем товарам Nordlane Home на Ozon и Wildberries: продажи, остатки и то, что требует внимания сегодня.</p></div>
+    <div class="seg" role="group" aria-label="Период">${[7, 30, 60].map(n => `<button class="${n === d ? 'on' : ''}" data-act="ov-period" data-n="${n}">${n} дн.</button>`).join('')}</div></div>
+  <div class="kpis">
+    <div class="card kpi glow"><div class="lbl"><i>${ic('pulse')}</i>Заказы, ₽</div><div class="val" data-count="${sumC}" data-f="money">${compactMoney(sumC)}</div><div class="dl">${dl(sumC, sumP)}</div>${sparkline(sp30('orders_sum'), '#b157f0', 200, 36)}</div>
+    <div class="card kpi"><div class="lbl"><i>${ic('box')}</i>Заказы, шт.</div><div class="val" data-count="${ordC}">${fmt(ordC)}</div><div class="dl">${dl(ordC, ordP)}</div>${sparkline(sp30('orders_amount'), '#4d92ff', 200, 36)}</div>
+    <div class="card kpi"><div class="lbl"><i>${ic('grid')}</i>Остаток на складах</div><div class="val" data-count="${stWb + stOz + stFbs}">${fmt(stWb + stOz + stFbs)}<small>шт.</small></div><div class="dl"><span>WB ${fmt(stWb)} · Ozon ${fmt(stOz)} · FBS ${fmt(stFbs)}</span></div></div>
+    <div class="card kpi"><div class="lbl"><i>${ic('sync')}</i>Средний оборот</div><div class="val" data-count="${turn || 0}" data-f="dec1">${fmt(turn, 1)}<small>дн.</small></div><div class="dl">${turn != null ? turnPill(turn) : ''}<span>${turn < 21 ? 'пора пополнять' : 'запас в норме'}</span></div></div>
+    <div class="card kpi wide"><div class="lbl"><i>${ic('alert')}</i>Под риском</div><div class="val" data-count="${risk}">${risk}<small>${plural(risk, 'товар', 'товара', 'товаров')}</small></div><div class="dl"><span class="${risk ? 'down' : 'up'}">к заказу ${fmt(recAll)} шт.</span><span>оборот &lt; 7 дн.</span></div></div>
+  </div>
+  <div class="ov-row">
+    <div class="card pad"><div class="card-h"><div><h3>Динамика заказов, ₽</h3><div class="hint">Wildberries и Ozon за ${d} ${plural(d, 'день', 'дня', 'дней')}</div></div>
+      <div class="legend"><span><i style="background:${COL.wb}"></i>WB <b>${compactMoney(wbT)}</b></span><span><i style="background:${COL.ozon}"></i>Ozon <b>${compactMoney(ozT)}</b></span></div></div>
+      ${chart('ov-main', { labels: dates, series: [{ name: 'Wildberries', color: hexCol.wb, data: wbS }, { name: 'Ozon', color: hexCol.ozon, data: ozS }], axis: v => v >= 1e6 ? fmt(v / 1e6, 1) + ' млн' : v >= 1000 ? fmt(v / 1000) + ' тыс' : fmt(v), tipFmt: v => money(v), title: 'Динамика заказов' })}
+    </div>
+    <div class="card pad"><div class="card-h"><h3>Структура остатков</h3><span class="hint">все склады</span></div>
+      <div class="donut-wrap"><div class="donut">${donut([{ v: stWb, color: hexCol.wb, label: 'WB' }, { v: stOz, color: hexCol.ozon, label: 'Ozon' }, { v: stFbs, color: hexCol.fbs, label: 'FBS' }])}<div class="mid"><b>${compactNum(stWb + stOz + stFbs)}</b><span>шт. всего</span></div></div>
+        <div class="dl-list">${[['WB (FBO)', stWb, 'wb'], ['Ozon', stOz, 'ozon'], ['WB-FBS', stFbs, 'fbs']].map(([l, v, k]) => `<div class="it"><i style="background:${COL[k]}"></i><span>${l}</span><b>${fmt(v)}<small>${fmt(v / (stWb + stOz + stFbs) * 100)}%</small></b></div>`).join('')}</div></div>
+    </div>
+  </div>
+  <div class="ov-row2">
+    <div class="card pad"><div class="card-h"><h3>Требуют внимания</h3><span class="hint">самый низкий оборот по складам</span></div><div class="attn">${attHtml}</div></div>
+    <div class="card pad"><div class="card-h"><h3>Топ товаров по заказам</h3><span class="hint">за ${d} дн.</span></div><div class="tops">${topHtml}</div><div class="legend" style="margin-top:14px"><span><i style="background:${COL.wb}"></i>WB</span><span><i style="background:${COL.ozon}"></i>Ozon</span></div></div>
+  </div>
+  <div class="card pad"><div class="card-h"><div><h3>Карта оборачиваемости</h3><div class="hint">Дней до обнуления остатка по каждому складу. Клик по артикулу откроет карточку.</div></div>
+    <div class="legend"><span><i style="background:var(--danger)"></i>&lt; 7 дн.</span><span><i style="background:var(--warn)"></i>7–21</span><span><i style="background:var(--ok)"></i>&gt; 21</span></div></div>
+    <div class="heat-wrap"><table class="heat"><thead><tr><th></th>${head}</tr></thead><tbody>${heat}</tbody></table></div></div>`;
+}
+const compactNum = n => n >= 1e4 ? fmt(n / 1e3, 1) + 'k' : fmt(n);
+
+/* ---------- Избранное ---------- */
+function fileStock(P) {
+  const out = { ozon: null, wb: null };
+  ['ozon', 'wb'].forEach(mp => { if (S.reports[mp] && P[mp]) out[mp] = Math.round(mpSummary(P, mp, allWh).stock * (.96 + ((P.id * 3 + (mp === 'wb' ? 1 : 2)) % 9) / 100)); });
+  if (out.ozon == null && out.wb == null) return null;
+  return { ...out, total: (out.ozon || 0) + (out.wb || 0) };
+}
+function whTable(P, mp) {
+  const rows = selWh(P, mp); if (!rows.length) return '<div class="wh-empty">Склады ещё не выбраны — нажмите «+ Добавить склад»</div>';
+  return `<div class="tw"><table class="wh"><thead><tr><th>Склад / регион</th><th>Остаток</th><th>Оборот</th><th>Активность</th><th>К заказу</th><th></th></tr></thead><tbody>${rows.map(w => {
+    const t = turnDays(w), r = recOrder(w, mp), bar = t == null ? 0 : clamp(t / 60 * 100, 4, 100);
+    return `<tr><td>${esc(w.name)}</td><td class="n">${w.stock} шт.</td><td>${turnPill(t)}<span class="mini"><i style="width:${bar}%;background:var(--${turnClass(t) === 'red' ? 'danger' : turnClass(t) === 'amber' ? 'warn' : 'ok'})"></i></span></td><td><span class="chip">${fmt(w.orders, 1)} шт/сут.</span></td><td>${r ? `<span class="order-flag">${r} шт.</span>` : '<span class="neutral">—</span>'}</td><td><button class="x" data-act="wh-del" data-pid="${P.id}" data-mp="${mp}" data-w="${w.id}" title="Убрать склад" aria-label="Убрать склад ${esc(w.name)}">✕</button></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+}
+function mpSection(P, mp) {
+  if (!P[mp]) return '';
+  const id = `${mp}-${P.id}`, s = mpSummary(P, mp), open = UI.open.has(id), pkOpen = UI.pk.has(id);
+  const notAdded = WAREHOUSES.filter(w => w.mp === mp && !(S.sel[P.id][mp] || []).includes(w.id));
+  return `<button class="mp-btn ${open ? 'open' : ''}" data-act="sec" data-id="${id}"><span>${mpBadge(mp)}${s.n} ${plural(s.n, 'склад', 'склада', 'складов')} &nbsp;·&nbsp; остаток: <b>${fmt(s.stock)}</b> шт.${s.rec ? ` &nbsp;·&nbsp; <span class="order-flag">к заказу ${fmt(s.rec)}</span>` : ''}</span><span class="chev">${ic('chev')}</span></button>
+  <div class="mp-body ${open ? 'open' : ''}" id="body-${id}">${whTable(P, mp)}
+    <div class="row-actions"><button class="btn sm" data-act="picker" data-id="${id}">${ic('plus')} Добавить склад</button></div>
+    <div class="picker ${pkOpen ? 'open' : ''}" id="pk-${id}">${notAdded.length ? `<div class="pk-grid">${notAdded.map(w => `<label class="pk-chip"><input type="checkbox" value="${w.id}"> ${esc(w.name)}</label>`).join('')}</div><button class="btn sm accent" data-act="wh-add" data-pid="${P.id}" data-mp="${mp}" data-id="${id}">Добавить выбранные</button>` : '<div class="wh-empty">Все склады этого маркетплейса уже добавлены</div>'}</div>
+  </div>`;
+}
+function fbsSection(P) {
+  if (!P.fbs) return '';
+  const id = `fbs-${P.id}`, open = UI.open.has(id), all = [P.fbs.main, ...P.fbs.subs];
+  const rows = all.map(w => { const dl = w.delta; return `<tr><td>${esc(w.name)}</td><td class="n">${w.stock} шт.</td><td>${dl == null ? '<span class="neutral">—</span>' : dl === 0 ? '0' : `<span class="${dl > 0 ? 'up' : 'down'}">${dl > 0 ? '+' : ''}${dl}</span>`}</td></tr>`; }).join('');
+  return `<button class="mp-btn ${open ? 'open' : ''}" data-act="sec" data-id="${id}"><span><span class="mp fbs">WB-FBS</span>${all.length} ${plural(all.length, 'склад', 'склада', 'складов')} &nbsp;·&nbsp; остаток: <b>${fmt(P.fbsTotal)}</b> шт.</span><span class="chev">${ic('chev')}</span></button>
+  <div class="mp-body ${open ? 'open' : ''}"><div class="tw"><table class="wh"><thead><tr><th>Склад</th><th>Остаток</th><th>Δ к пред. дню</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function flexBlock(P, keys) {
+  if (!keys.length) return '';
+  const rows = keys.map(k => {
+    const m = METRIC[k]; if (!m) return '';
+    const { cur, prev } = periodCmp(P, k, S.period);
+    return `<tr><td>${esc(m.label)}${m.hint ? `<span class="info">i<span class="tipx">${esc(m.hint)}</span></span>` : ''}</td><td>${fmtMetric(prev, m.unit)}</td><td class="cur">${fmtMetric(cur, m.unit)}</td><td>${deltaHtml(cur, prev, m)}</td></tr>`;
+  }).join('');
+  return `<div class="flex-block"><div class="flex-title">Гибкие метрики · ${S.period} ${plural(S.period, 'день', 'дня', 'дней')}</div><div class="tw"><table class="cmp"><thead><tr><th>Данные</th><th>Пред. период</th><th>Текущий</th><th>Разница</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function pcard(P, opts = {}) {
+  const g = groupSummary(P), [sc, sl] = statusOf(g.turn), fs = fileStock(P);
+  const tot = g.stockBy.wb + g.stockBy.ozon + g.fbs || 1;
+  const seg = (v, k) => v ? `<i style="width:${v / tot * 100}%;background:${COL[k]}"></i>` : '';
+  const fsPart = (l, q) => q != null ? `${l}: <b>${q}</b> шт` : `${l}: <span class="warn-t">нет данных</span>`;
+  const runway = g.runwayDate ? (g.turn > 300 ? 'более года' : dShort(g.runwayDate)) : '—';
+  const spark = sparkline(dailySeries([P], 'orders_amount', DAYS - 14, DAYS - 1), sc === 'red' ? '#ff6b86' : sc === 'amber' ? '#ffb84d' : '#35d6a0', 140, 54);
+  return `<article class="card pcard st-${sc}" data-pid="${P.id}">
+    <div class="pc-head"><div><div class="pc-title" data-act="drawer" data-pid="${P.id}">${esc(P.article)}</div><div class="pc-sub">${esc(P.name)}</div></div>
+      <div class="pc-top"><span class="pill ${sc}">${sl}</span>${opts.preview ? '' : `<button class="btn sm icon ghost" style="width:30px" data-act="fav-toggle" data-pid="${P.id}" title="Убрать из избранного" aria-label="Убрать из избранного">${ic('x')}</button>`}</div></div>
+    <div class="pc-body"><div class="pc-nums">
+      <div class="pc-num"><div class="l">Остаток (API)</div><div class="v">${fmt(g.stock)}<small>шт.</small></div></div>
+      <div class="pc-num"><div class="l">Оборот</div><div class="v">${g.turn != null ? turnPill(g.turn) : turnPill(null)}</div></div>
+      <div class="pc-num"><div class="l">Хватит до</div><div class="v" style="font-size:16px">${runway}</div></div></div>
+      <div title="Заказы за 14 дней">${spark}</div></div>
+    <div class="stack"><div class="bar2">${seg(g.stockBy.wb, 'wb')}${seg(g.stockBy.ozon, 'ozon')}${seg(g.fbs, 'fbs')}</div>
+      <div class="lg">${g.stockBy.wb ? `<span><i style="background:${COL.wb}"></i>WB <b>${fmt(g.stockBy.wb)}</b></span>` : ''}${g.stockBy.ozon ? `<span><i style="background:${COL.ozon}"></i>Ozon <b>${fmt(g.stockBy.ozon)}</b></span>` : ''}${g.fbs ? `<span><i style="background:${COL.fbs}"></i>FBS <b>${fmt(g.fbs)}</b></span>` : ''}${g.rec ? `<span style="margin-left:auto" class="order-flag">К заказу: ${fmt(g.rec)} шт.</span>` : ''}</div></div>
+    ${fs ? `<div class="file-row">Остаток из файлов: <b>${fs.total}</b> шт. (${fsPart('Озон', fs.ozon)} / ${fsPart('WB', fs.wb)})</div>` : ''}
+    ${flexBlock(P, S.metrics)}
+    <div class="mp-sections">${mpSection(P, 'wb')}${mpSection(P, 'ozon')}${fbsSection(P)}</div>
+  </article>`;
+}
+function renderFavorites() {
+  const favs = S.favs.map(id => PBY[id]);
+  const period = S.metrics.length ? `<div class="period-row"><label>Сверка гибких метрик за:</label><div class="seg">${[1, 7, 30, 60].map(n => `<button class="${n === S.period ? 'on' : ''}" data-act="period" data-n="${n}">${n} дн.</button>`).join('')}</div></div>` : '';
+  return `<div class="h2"><div><h2>Избранное</h2><p>Одна карточка на артикул: WB и Ozon вместе. Разверните маркетплейс, чтобы увидеть склады, оборот и рекомендацию к заказу.</p></div></div>` +
+    (favs.length ? period + `<div class="fav-grid">${favs.map(p => pcard(p)).join('')}</div>` : `<div class="card empty"><div class="big">☆</div>Пока нет избранных товаров.<br>Перейдите во вкладку «Все товары», чтобы добавить нужные.<br><br><button class="btn accent" data-act="go" data-tab="products">Открыть все товары</button></div>`);
+}
+
+/* ---------- Все товары ---------- */
+const SORTS = [['orders', 'Больше заказов'], ['sales', 'Больше продаж'], ['stock', 'Больше остатков'], ['turn', 'Критичные сначала'], ['name', 'По имени']];
+const FILTERS = [['all', 'Все'], ['fav', 'Избранное'], ['wb', 'WB'], ['ozon', 'Ozon'], ['crit', 'Критичные']];
+function prodStats(p) {
+  const orders = groupMetric([p], 'orders_amount', DAYS - 7, DAYS - 1) || 0, sales = groupMetric([p], 'sales_amount', DAYS - 7, DAYS - 1) || 0;
+  const g = groupSummary(p, allWh);
+  return { orders, sales, stock: g.stock + (p.fbsTotal || 0), turn: g.turn };
+}
+function productRows() {
+  const q = UI.pf.q.trim().toLowerCase();
+  let list = PRODUCTS.filter(p => !q || (p.name + ' ' + p.article).toLowerCase().includes(q));
+  list = list.filter(p => { const f = UI.pf.flt; if (f === 'fav') return S.favs.includes(p.id); if (f === 'wb') return !!p.wb; if (f === 'ozon') return !!p.ozon; if (f === 'crit') { const t = prodStats(p).turn; return t != null && t < 14; } return true; });
+  const st = Object.fromEntries(list.map(p => [p.id, prodStats(p)]));
+  const sk = UI.pf.sort;
+  list.sort((a, b) => sk === 'name' ? a.article.localeCompare(b.article) : sk === 'turn' ? ((st[a.id].turn ?? 1e9) - (st[b.id].turn ?? 1e9)) : (st[b.id][sk] - st[a.id][sk]));
+  return list.map(p => { const s = st[p.id], fav = S.favs.includes(p.id);
+    return `<div class="card prow" data-act="drawer" data-pid="${p.id}"><div><div class="nm">${p.wb ? mpBadge('wb') : ''}${p.ozon ? mpBadge('ozon') : ''}<span>${esc(p.article)}</span></div><div class="ds">${esc(p.name)}</div></div>
+      <div class="chips"><span class="chip">Заказы 7д: <b>${fmt(s.orders)}</b></span><span class="chip">Продажи 7д: <b>${fmt(s.sales)}</b></span><span class="chip">Остаток: <b>${fmt(s.stock)}</b></span>${turnPill(s.turn)}</div>
+      <div class="sp">${sparkline(dailySeries([p], 'orders_amount', DAYS - 21, DAYS - 1), '#7b6cff', 110, 32)}</div>
+      <button class="star ${fav ? 'on' : ''}" data-act="fav-toggle" data-pid="${p.id}">${ic('star')}${fav ? 'В избранном' : 'В избранное'}</button></div>`; }).join('') || '<div class="card empty">Ничего не найдено</div>';
+}
+function renderProducts() {
+  return `<div class="h2"><div><h2>Все товары</h2><p>Каталог магазина. Добавляйте артикулы в избранное: тогда они попадут в карточки, поставки и алерты.</p></div></div>
+  <div class="toolbar"><div class="search">${ic('search')}<input id="pq" data-in="pf-q" placeholder="Поиск по названию или артикулу…" value="${esc(UI.pf.q)}" autocomplete="off"></div>
+    <div class="seg" id="pfl">${FILTERS.map(([k, l]) => `<button class="${UI.pf.flt === k ? 'on' : ''}" data-act="pf-flt" data-k="${k}">${l}</button>`).join('')}</div></div>
+  <div class="toolbar" style="margin-top:-4px"><span class="count-note" style="margin:0">Сортировка:</span><div class="seg" id="psr">${SORTS.map(([k, l]) => `<button class="${UI.pf.sort === k ? 'on' : ''}" data-act="pf-sort" data-k="${k}">${l}</button>`).join('')}</div></div>
+  <div class="plist" id="plist">${productRows()}</div>`;
+}
+
+/* ---------- Поставки ---------- */
+function planGroups() {
+  const prods = UI.plan.scope === 'fav' ? S.favs.map(id => PBY[id]) : PRODUCTS, groups = {};
+  prods.forEach(P => ['wb', 'ozon'].forEach(mp => { if (UI.plan.mp !== 'all' && UI.plan.mp !== mp) return; selWh(P, mp).forEach(w => { const q = recOrder(w, mp); if (q <= 0) return; (groups[w.id] = groups[w.id] || { wh: WH_BY_ID[w.id], rows: [] }).rows.push({ key: `${P.id}:${w.id}`, P, w, q, mp }); }); }));
+  return Object.values(groups).map(g => { g.rows.sort((a, b) => b.q - a.q); g.total = g.rows.filter(r => !UI.plan.off.has(r.key)).reduce((s, r) => s + r.q, 0); return g; }).sort((a, b) => b.total - a.total);
+}
+function planSummary(gs) {
+  const rows = gs.flatMap(g => g.rows.filter(r => !UI.plan.off.has(r.key)));
+  return { units: rows.reduce((s, r) => s + r.q, 0), skus: new Set(rows.map(r => r.P.id)).size, whs: gs.filter(g => g.total > 0).length, retail: rows.reduce((s, r) => s + r.q * r.P.price, 0), rows };
+}
+function renderPlan() {
+  const gs = planGroups(), sm = planSummary(gs), eta = mp => dShort(new Date(TODAY.getTime() + leadFor(mp) * DAY_MS));
+  const groupsHtml = gs.map(g => `<div class="card plan-g"><div class="pg-h"><div><div class="t">${mpBadge(g.wh.mp)}${esc(g.wh.name)}</div><div class="m">Прибытие ≈ ${eta(g.wh.mp)} · плечо ${leadFor(g.wh.mp)} дн.</div></div><div class="tot">к отправке<b>${fmt(g.total)} шт.</b></div></div>
+    ${g.rows.map(r => { const off = UI.plan.off.has(r.key), t = turnDays(r.w); return `<div class="pg-r ${off ? 'off' : ''}"><input type="checkbox" ${off ? '' : 'checked'} data-ch="plan-chk" data-key="${r.key}" aria-label="Включить ${esc(r.P.article)}"><span class="a" data-act="drawer" data-pid="${r.P.id}">${esc(r.P.article)}</span><span class="hid neutral">${r.w.stock} шт.</span><span class="hid">${turnPill(t)}</span><span class="q">${r.q} шт.</span></div>`; }).join('')}</div>`).join('');
+  return `<div class="h2"><div><h2>План поставок</h2><p>Что и куда отправить, чтобы закрыть цикл ${S.settings.planning_days} дн. с учётом плеча доставки. Пересчитывается при изменении параметров расчёта.</p></div></div>
+  <div class="toolbar"><div class="seg">${[['fav', 'Избранное'], ['all', 'Все товары']].map(([k, l]) => `<button class="${UI.plan.scope === k ? 'on' : ''}" data-act="plan-scope" data-k="${k}">${l}</button>`).join('')}</div>
+    <div class="seg">${[['all', 'WB + Ozon'], ['wb', 'WB'], ['ozon', 'Ozon']].map(([k, l]) => `<button class="${UI.plan.mp === k ? 'on' : ''}" data-act="plan-mp" data-k="${k}">${l}</button>`).join('')}</div>
+    <button class="btn sm ghost" data-act="plan-all" data-on="1">Отметить всё</button><button class="btn sm ghost" data-act="plan-all" data-on="0">Снять всё</button></div>
+  <div class="plan-layout"><div class="plan-groups">${groupsHtml || '<div class="card empty"><div class="big">✓</div>Все склады обеспечены, поставки не требуются</div>'}</div>
+    <div class="card pad sticky-sum"><div class="card-h"><h3>Итого к отправке</h3></div><div class="sum-big">${fmt(sm.units)} шт.</div>
+      <div class="sum-list"><div>Артикулов<b>${sm.skus}</b></div><div>Складов<b>${sm.whs}</b></div><div>В розничных ценах<b>${compactMoney(sm.retail)}</b></div><div>Прибытие WB<b>≈ ${eta('wb')}</b></div><div>Прибытие Ozon<b>≈ ${eta('ozon')}</b></div></div>
+      <div class="row" style="flex-wrap:wrap"><button class="btn accent" data-act="plan-copy" ${sm.units ? '' : 'disabled'}>${ic('copy')} Скопировать</button><button class="btn" data-act="plan-csv" ${sm.units ? '' : 'disabled'}>${ic('download')} CSV</button></div></div></div>`;
+}
+function planText() {
+  const gs = planGroups().filter(g => g.total > 0); const L = ['План поставок · ' + TODAY.toLocaleDateString('ru'), ''];
+  gs.forEach(g => { L.push(`${g.wh.name} (${MP_LABEL[g.wh.mp]}): ${g.total} шт.`); g.rows.filter(r => !UI.plan.off.has(r.key)).forEach(r => L.push(`  • ${r.P.article}: ${r.q} шт.`)); L.push(''); });
+  return L.join('\n').trim();
+}
+function planCsv() {
+  const L = ['Склад;Маркетплейс;Артикул;Название;Количество;Прибытие'];
+  planGroups().forEach(g => g.rows.filter(r => !UI.plan.off.has(r.key)).forEach(r => L.push([g.wh.name, MP_LABEL[g.wh.mp], r.P.article, r.P.name, r.q, new Date(TODAY.getTime() + leadFor(g.wh.mp) * DAY_MS).toLocaleDateString('ru')].join(';'))));
+  return '﻿' + L.join('\r\n');
+}
+/* ---------- Метрики карточки ---------- */
+function metricGroups(selected, attr) {
+  const groups = {}; METRICS.forEach(m => (groups[m.group] = groups[m.group] || []).push(m));
+  return GROUP_ORDER.filter(g => groups[g]).map(gn => `<div class="mg ${UI.mg.has(attr + gn) ? 'open' : ''}"><button class="mg-h" data-act="mg" data-g="${attr}${esc(gn)}"><span>${esc(gn)}<span class="c">(${groups[gn].length})</span></span><span class="arr">${ic('chev')}</span></button>
+    <div class="mg-b">${groups[gn].map(m => `<div class="tg-row"><span class="l">${esc(m.label)}${m.tag ? `<span class="tag">${m.tag}</span>` : ''}${m.excl ? `<span class="tag">только ${m.excl === 'wb' ? 'WB' : 'Ozon'}</span>` : ''}${m.hint ? `<span class="s">${esc(m.hint)}</span>` : ''}</span>
+      <label class="sw"><input type="checkbox" data-ch="${attr === 'c' ? 'metric-card' : 'daily-metric'}" data-key="${m.key}" ${selected.includes(m.key) ? 'checked' : ''}><span></span></label></div>`).join('')}</div></div>`).join('');
+}
+function renderMetrics() {
+  const favs = S.favs.map(id => PBY[id]); const pv = PBY[UI.pv] && S.favs.includes(UI.pv) ? PBY[UI.pv] : favs[0];
+  return `<div class="h2"><div><h2>Метрики карточки</h2><p>Выберите, какие показатели сравнивать на карточках «Избранное». Переключатель сохраняется сразу, справа живой предпросмотр.</p></div></div>
+  <div class="set-layout"><div><div class="groups">${metricGroups(S.metrics, 'c')}</div><div class="save-note" id="mNote"></div></div>
+    <div class="sticky-p"><h3>Предпросмотр карточки</h3>${favs.length ? `<div class="row" style="margin-bottom:10px"><span class="count-note" style="margin:0">Товар:</span><select class="inp" data-ch="pv-sel">${favs.map(p => `<option value="${p.id}" ${p.id === pv.id ? 'selected' : ''}>${esc(p.article)}</option>`).join('')}</select></div><div id="pvBox">${pcard(pv, { preview: true })}</div>` : '<div class="card empty">Нет избранных товаров для предпросмотра</div>'}</div></div>`;
+}
+
+/* ---------- Алерты: построители сообщений (как в Telegram) ---------- */
+function mLabel(k) { return METRIC[k].label; }
+function buildDaily() {
+  const a = S.alerts.daily, favs = S.favs.map(id => PBY[id]).sort((x, y) => x.article.localeCompare(y.article));
+  if (!favs.length) return null;
+  const L = ['<b>📦 Остатки по избранному на сегодня</b>', ''], regions = {}; let any = false;
+  favs.forEach(P => {
+    const stock = [], met = [];
+    ['ozon', 'wb'].forEach(mp => {
+      if (!P[mp]) return; const rows = selWh(P, mp).slice().sort((x, y) => x.name.localeCompare(y.name));
+      if (a.stock && rows.length) {
+        const ts = rows.reduce((s, w) => s + w.stock, 0), td = rows.reduce((s, w) => s + w.ds, 0), turn = td > 0 ? Math.round(ts / td * 10) / 10 : null;
+        stock.push(`${MP_LABEL[mp]} - ${ts} шт | оборот - ${turn != null ? turn + ' дн.' : 'н/д'}`);
+        if (a.details) rows.forEach(w => { const r = recOrder(w, mp); stock.push(`   ↳ ${esc(w.name)}: ${w.stock} шт.${r ? `, к заказу: ${r} шт.` : ''}`); });
+        if (a.regions) rows.forEach(w => { const r = recOrder(w, mp); if (r > 0) (regions[w.name] = regions[w.name] || []).push(`${esc(P.article)}: ${r} шт.`); });
+      }
+      const parts = a.metrics.filter(k => METRIC[k] && (!METRIC[k].excl || METRIC[k].excl === mp)).map(k => { const v = mpMetric(P, mp, k, DAYS - 1, DAYS - 1); return v == null ? null : `${esc(mLabel(k))}: ${fmtMetric(v, METRIC[k].unit)}`; }).filter(Boolean);
+      if (parts.length) { if (met.length) met.push(''); met.push(`${MP_LABEL[mp]}:`, ...parts); }
+    });
+    if (a.stock && P.fbs) { stock.push(`WB-FBS - ${P.fbsTotal} шт`); if (a.details) [P.fbs.main, ...P.fbs.subs].forEach(w => { const d = w.delta; stock.push(`   ↳ ${esc(w.name)}: ${w.stock} шт.${d ? (d > 0 ? ` (🔺+${d})` : ` (🔻${d})`) : ''}`); }); }
+    if (!stock.length && !met.length) return;
+    any = true; L.push(`<b>${esc(P.article)}</b>`, ''); if (stock.length) L.push('остатки:', ...stock); if (met.length) { if (stock.length) L.push(''); L.push(...met); } L.push('');
+  });
+  if (!any) return null;
+  if (a.stock && a.regions && Object.keys(regions).length) { L.push('<b>📍 К отправке по регионам</b>', ''); Object.keys(regions).sort().forEach(n => { L.push(`<b>${esc(n)}</b>`); regions[n].forEach(r => L.push(`   • ${r}`)); L.push(''); }); }
+  return L.join('\n').trim();
+}
+function buildIntraday() {
+  const a = S.alerts.intraday, t = a.times[0] || '12:00', hr = hm(t) / 60, frac = Math.pow(clamp((hr - 6) / 17, .08, 1), 1.15), hits = [];
+  S.favs.map(id => PBY[id]).forEach(P => a.channels.forEach(mp => { if (!P[mp]) return; const yest = Math.round(P[mp].series.orders_amount[DAYS - 1] * frac), delta = (P.id * 5 + (mp === 'wb' ? 2 : 5)) % 11; if (delta >= a.threshold) hits.push({ P, mp, y: yest, t: yest + delta, delta }); }));
+  hits.sort((x, y) => y.delta - x.delta); if (!hits.length) return null;
+  const L = ['<b>⚡ Резкий рост заказов</b>', ''];
+  hits.slice(0, 4).forEach((h, i, arr) => { L.push(`«${esc(h.P.article)}» - рост заказов на ${h.mp === 'wb' ? 'WB' : 'Ozon'} на <b>${t}</b>.`, `Вчера было <b>${h.y}</b> к этому часу, а сегодня :  <b>${h.t}</b>`); if (i < arr.length - 1) L.push(''); });
+  if (hits.length > 4) L.push('', `<i>…и ещё ${hits.length - 4}</i>`);
+  return L.join('\n');
+}
+function fbsProd(pid) { const m = S.alerts.fbs.products; if (!m[pid]) { const idx = S.favs.indexOf(pid); m[pid] = { enabled: idx > -1 && idx < 4, threshold: null, wh: {} }; } return m[pid]; }
+function buildFbs() {
+  const f = S.alerts.fbs, L = ['<b>🔔 Алерт ФБС остатков — не довезли на подсклад</b>', '']; let n = 0, sample = false;
+  const run = P => {
+    const c = fbsProd(P.id), thP = c.threshold ?? f.def, hit = P.fbs.subs.filter(w => w.stock < (c.wh[w.id] ?? thP) && w.id !== f.main).map(w => ({ w, th: c.wh[w.id] ?? thP }));
+    if (!hit.length) return false; L.push(`<b>${esc(P.article)}</b>`); hit.forEach(({ w, th }) => L.push(`   ↳ ${esc(w.name)} (${w.id}): ${w.stock} шт. (порог: меньше ${th} шт.)`));
+    const mainW = P.fbs.main; L.push(`   Основной склад — ${esc(mainW.name.replace('Основной склад · ', ''))} (${mainW.id}): ${mainW.stock} шт.`, ''); n++; return true;
+  };
+  S.favs.map(id => PBY[id]).filter(P => P.fbs && fbsProd(P.id).enabled).forEach(run);
+  if (!n) { sample = true; const P = S.favs.map(id => PBY[id]).find(p => p.fbs) || PRODUCTS[0]; const w = P.fbs.subs[0]; L.push(`<b>${esc(P.article)}</b>`, `   ↳ ${esc(w.name)} (${w.id}): 4 шт. (порог: меньше ${f.def} шт.)`, `   Основной склад — ${esc(P.fbs.main.name.replace('Основной склад · ', ''))} (301): ${P.fbs.main.stock} шт.`); }
+  return { msg: L.join('\n').trim(), sample };
+}
+function nowHm() { return new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }); }
+function tgPreview(type, msg, sample) {
+  const sent = UI.sent[type]; const list = sent.length ? sent : (msg ? [{ html: msg, t: nowHm() }] : []);
+  return `<div class="tg"><div class="tg-h"><div class="tg-av">${ic('bot')}</div><div><div class="tg-n">Трекер остатков</div><div class="tg-s">@${esc(S.bot.username)} · бот</div></div></div>
+  <div class="tg-msgs" id="tgMsgs-${type}">${list.length ? list.map(m => `<div class="bub"><div class="tx">${m.html}</div><div class="mt"><span>${m.t}</span><em>✓✓</em></div></div>`).join('') : '<div class="tg-empty">Нечего показать: избранное пустое или все блоки выключены</div>'}</div>${sample && !sent.length ? '<div class="tg-tag">Пример формата — реальные данные появятся при срабатывании</div>' : ''}</div>`;
+}
+function previewFor(type) {
+  if (type === 'daily') return tgPreview('daily', buildDaily(), false);
+  if (type === 'intraday') { const m = buildIntraday(); return tgPreview('intraday', m || ('<b>⚡ Резкий рост заказов</b>\n\nСейчас нет товаров, у которых рост заказов выше порога.'), !m); }
+  const r = buildFbs(); return tgPreview('fbs', r.msg, r.sample);
+}
+function swt(attr, checked, extra = '', dis = false) { return `<label class="sw"><input type="checkbox" ${attr} ${checked ? 'checked' : ''} ${dis ? 'disabled' : ''} ${extra}><span></span></label>`; }
+
+function botPanel() {
+  const chats = S.bot.chats;
+  return `<div class="card bot"><div class="card-h" style="margin-bottom:12px"><h3>${ic('bot')} Telegram-бот</h3><span class="bot-st" id="botSt">● @${esc(S.bot.username)}</span></div>
+  <div class="bot-f"><div class="field"><label>Токен бота</label><div class="row"><input class="inp" id="tokIn" type="${UI.tok ? 'text' : 'password'}" value="${UI.tok ? 'demo:AAH_fake_token_for_portfolio_only' : S.bot.masked}" data-in="tok" spellcheck="false" autocomplete="off"><button class="btn sm icon" style="width:36px" data-act="tok-eye" aria-label="Показать токен">${ic('eye')}</button><button class="btn sm accent" data-act="tok-save">Сохранить</button></div><div class="thint" id="tokNote">Демо-токен. Реальный хранится в БД на сервере и не попадает в браузер.</div></div>
+  <div class="field"><label>Получатели (chat_id)<span class="info">i<span class="tipx">Чтобы бот мог писать человеку, тот должен сначала отправить боту /start.</span></span></label><div class="chips-l">${chats.length ? chats.map(c => `<span class="chat-chip">${esc(c)}<button class="x" data-act="chat-del" data-id="${esc(c)}" aria-label="Удалить">✕</button></span>`).join('') : '<span class="neutral" style="font-size:12px">Получателей ещё нет</span>'}</div>
+  <div class="row"><input class="inp" id="chatIn" placeholder="Например, 100200302" inputmode="numeric"><button class="btn sm" data-act="chat-add">${ic('plus')} Добавить</button></div></div></div></div>`;
+}
+function alertBody() {
+  const t = UI.alert, A = S.alerts;
+  if (t === 'daily') {
+    const d = A.daily;
+    return `<div class="set-layout"><div>
+      <div class="compact"><div class="cit"><span class="l">Ежедневный алерт</span>${swt('data-ch="daily-en"', d.enabled)}</div><div class="cit"><span class="l">Время отправки</span><div>${timeChips('daily', [d.time], 1)}</div></div></div>
+      <div class="fblock"><h4>Что включить в сводку</h4>
+        <div class="tg-row"><span class="l">Остатки и рекомендации по заказу<span class="s">Основной блок: сколько на складе и сколько заказать</span></span>${swt('data-ch="daily-stock"', d.stock)}</div>
+        <div class="tg-row sub-t"><span class="l">↳ Детализация по каждому складу<span class="s">Если выключено, только общая строка по товару</span></span>${swt('data-ch="daily-det"', d.details, '', !d.stock)}</div>
+        <div class="tg-row sub-t"><span class="l">↳ Блок «К отправке по регионам»<span class="s">Склад → что и сколько туда отправить</span></span>${swt('data-ch="daily-reg"', d.regions, '', !d.stock)}</div>
+        <div class="groups" style="margin-top:12px">${metricGroups(d.metrics, 'd')}</div></div>
+      <div class="test-row"><button class="btn" data-act="alert-test" data-t="daily">🧪 Протестировать</button><span id="tn-daily"></span></div><div class="save-note" id="aNote"></div></div>
+      <div class="sticky-p"><h3>Предпросмотр в Telegram</h3><div id="pv-daily">${previewFor('daily')}</div></div></div>`;
+  }
+  if (t === 'intraday') {
+    const d = A.intraday;
+    return `<div class="set-layout"><div>
+      <div class="compact"><div class="cit"><span class="l">Алерт роста заказов</span>${swt('data-ch="intr-en"', d.enabled)}</div>
+        <div class="cit"><span class="l">Порог: заказов больше чем вчера</span><input class="inp num" type="number" min="1" data-ch="intr-thr" value="${d.threshold}"></div>
+        <div class="cit"><span class="l">WB</span>${swt('data-ch="intr-wb"', d.channels.includes('wb'))}</div><div class="cit"><span class="l">Ozon</span>${swt('data-ch="intr-oz"', d.channels.includes('ozon'))}</div></div>
+      <div class="fblock"><h4>Времена проверки (1–16 раз в день)</h4>${timeChips('intraday', UI.attempt || d.times, 16, UI.bad)}<div class="thint">Между проверками минимум 1 час, окно 07:00–22:00</div><div class="terr" id="tErr"></div></div>
+      <div class="test-row"><button class="btn" data-act="alert-test" data-t="intraday">🧪 Протестировать</button><span id="tn-intraday"></span></div><div class="save-note" id="aNote"></div></div>
+      <div class="sticky-p"><h3>Предпросмотр в Telegram</h3><div id="pv-intraday">${previewFor('intraday')}</div></div></div>`;
+  }
+  const f = A.fbs, wbFavs = S.favs.map(id => PBY[id]).filter(p => p.fbs);
+  return `<div class="set-layout"><div>
+    <div class="compact"><div class="cit"><span class="l">Алерт ФБС остатков</span>${swt('data-ch="fbs-en"', f.enabled)}</div><div class="cit"><span class="l">Время проверки</span><div>${timeChips('fbs', [f.time], 1)}</div></div></div>
+    <div class="fblock"><h4>Основной склад (откуда довозят на подсклады)</h4><select class="inp" data-ch="fbs-main">${FBS_WH.map(w => `<option value="${w.id}" ${f.main === w.id ? 'selected' : ''}>${esc(w.name)} (${w.id})</option>`).join('')}</select>
+      <h4 style="margin-top:16px">Порог по умолчанию</h4><div class="row"><span class="count-note" style="margin:0">Алертить, если на подскладе меньше чем</span><input class="inp num" type="number" min="1" data-ch="fbs-def" value="${f.def}"><span class="count-note" style="margin:0">шт.</span></div></div>
+    <div class="fblock"><h4>Товары (избранное): включить точечно</h4><div class="thint" style="margin:-4px 0 10px">Порог = «алертить, если остаток на подскладе <b>меньше</b> этого числа». Три уровня: свой порог склада → порог товара → порог по умолчанию (${f.def} шт.).</div>
+      ${wbFavs.length ? wbFavs.map(P => { const c = fbsProd(P.id); return `<div class="tg-row"><span class="l">${esc(P.article)}<span class="s">${P.fbs.subs.length} подсклада (кроме основного)</span></span><div class="row"><span class="count-note" style="margin:0">меньше чем</span><input class="inp num" type="number" min="1" placeholder="${f.def}" value="${c.threshold ?? ''}" data-ch="fbs-p-thr" data-pid="${P.id}" ${c.enabled ? '' : 'disabled'}><span class="count-note" style="margin:0">шт.</span>${swt(`data-ch="fbs-p-en" data-pid="${P.id}"`, c.enabled)}</div></div>
+        ${c.enabled ? P.fbs.subs.map(w => `<div class="tg-row sub-t"><span class="l">↳ ${esc(w.name)}<span class="s">сейчас ${w.stock} шт.</span></span><div class="row"><span class="count-note" style="margin:0">свой порог:</span><input class="inp num" type="number" min="1" placeholder="${c.threshold ?? f.def}" value="${c.wh[w.id] ?? ''}" data-ch="fbs-w-thr" data-pid="${P.id}" data-w="${w.id}"><span class="count-note" style="margin:0">шт.</span></div></div>`).join('') : ''}`; }).join('') : '<div class="wh-empty">В избранном пока нет WB-товаров</div>'}</div>
+    <div class="test-row"><button class="btn" data-act="alert-test" data-t="fbs">🧪 Протестировать</button><span id="tn-fbs"></span></div><div class="save-note" id="aNote"></div></div>
+    <div class="sticky-p"><h3>Предпросмотр в Telegram</h3><div id="pv-fbs">${previewFor('fbs')}</div></div></div>`;
+}
+function renderAlerts() {
+  return `<div class="h2"><div><h2>Алерты</h2><p>Уведомления в Telegram: ежедневная сводка, резкий рост заказов и нехватка товара на подскладах FBS. Тест ничего не отправляет наружу, это демо.</p></div></div>
+  ${botPanel()}<div class="seg" id="aseg" style="margin-bottom:16px">${[['daily', 'Ежедневный'], ['intraday', 'Алерт роста заказов'], ['fbs', 'Алерт ФБС остатков']].map(([k, l]) => `<button class="${UI.alert === k ? 'on' : ''}" data-act="alert-seg" data-k="${k}">${l}</button>`).join('')}</div><div id="alertBody">${alertBody()}</div>`;
+}
+function refreshPreview() { const el = $('#pv-' + UI.alert); if (el) el.innerHTML = previewFor(UI.alert); }
+function noteSaved() { const n = $('#aNote') || $('#mNote'); if (!n) return; n.textContent = '✓ Сохранено'; clearTimeout(noteSaved.t); noteSaved.t = setTimeout(() => { n.textContent = ''; }, 1500); }
+
+/* ---------- Отчёты ---------- */
+function reportStatus(mp) {
+  const r = S.reports[mp]; if (!r) return '<span class="warn-t">Ещё нет данных, отчёт не загружался</span>';
+  const at = new Date(r.at).toLocaleString('ru', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return `Файл: <b>${esc(r.file)}</b><br>Обновлено: <b>${at}</b><br>Сопоставлено с базой: <b>${r.matched}</b>${r.unmatched ? ` <span class="warn-t">(не сопоставлено: ${r.unmatched})</span>` : ''}${r.unm && r.unm.length ? `<details><summary>⚠ Не сопоставлено с базой: ${r.unmatched}</summary><ul>${r.unm.map(a => `<li>${esc(a)}</li>`).join('')}</ul></details>` : ''}`;
+}
+function uploadResultHtml() {
+  if (!UI.upl) return ''; return `<div class="res"><div class="count-note" style="margin:0">Результат последней загрузки:</div>${UI.upl.map(r => `<div class="res-i ${r.ok ? 'ok' : 'err'}"><div class="hd">${r.ok ? '✅' : '❌'} ${esc(r.title)}</div><div class="dt">${esc(r.text)}</div></div>`).join('')}</div>`;
+}
+function renderReports() {
+  return `<div class="h2"><div><h2>Отчёты об остатках</h2><p>Ручная загрузка выгрузок из личных кабинетов. Данные идут отдельным полем «Остаток из файлов» на карточках избранного, рядом с остатком из API.</p></div></div>
+  <div class="card pad"><div class="drop" id="drop" data-act="pick-file" tabindex="0" role="button" aria-label="Выбрать файлы"><div class="ic">${ic('upload')}</div><b>Перетащите файлы сюда или нажмите для выбора</b><p>Ozon «Доступность товаров» и WB «Отчёт поставщика». Маркетплейс определяется автоматически. Файлы не покидают браузер.</p></div>
+    <input type="file" id="fileIn" multiple accept=".xlsx,.xls,.csv" hidden>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap"><span class="count-note" style="margin:0">Нет под рукой файла?</span><button class="btn sm" data-act="demo-upload" data-mp="ozon">Загрузить пример Ozon</button><button class="btn sm" data-act="demo-upload" data-mp="wb">Загрузить пример WB</button></div>
+    <div class="prog" id="uprog" style="display:none"><i></i></div><div id="uRes">${uploadResultHtml()}</div></div>
+  <div class="st2"><div class="card pad"><div class="card-h"><h3><span class="mp ozon">Ozon</span>статус</h3></div><div class="st-l">${reportStatus('ozon')}</div></div>
+    <div class="card pad"><div class="card-h"><h3><span class="mp wb">WB</span>статус</h3></div><div class="st-l">${reportStatus('wb')}</div></div></div>`;
+}
+function detectMp(name) { const n = name.toLowerCase(); if (/ozon|озон|доступност|availability/.test(n)) return 'ozon'; if (/supplier|wb|wildberries|вайлдб|поставщик|goods/.test(n)) return 'wb'; return null; }
+function processFiles(files) {
+  const prog = $('#uprog'); if (!prog) return; prog.style.display = 'block'; const bar = $('i', prog); bar.style.width = '8%';
+  let p = 8; const iv = setInterval(() => { p = Math.min(92, p + 14); bar.style.width = p + '%'; }, 140);
+  setTimeout(() => {
+    clearInterval(iv); bar.style.width = '100%'; const res = [];
+    files.forEach(f => {
+      const mp = detectMp(f.name);
+      if (!/\.(xlsx|xls|csv)$/i.test(f.name)) res.push({ ok: false, title: 'Не распознано', text: `${f.name}: нужен файл .xlsx, .xls или .csv` });
+      else if (!mp) res.push({ ok: false, title: 'Не распознано', text: `${f.name}: не похоже на отчёт Ozon или WB (возможно, старый отчёт «Аналитика»)` });
+      else { const total = PRODUCTS.filter(x => x[mp]).length, un = Math.round(rng() * 2), m = total - un + 2; S.reports[mp] = { file: f.name, at: Date.now(), matched: m, unmatched: un, unm: un ? ['NL-OLD-KETTLE-1500', 'NL-SAMPLE-X'].slice(0, un) : [] }; res.push({ ok: true, title: MP_LABEL[mp], text: `${f.name}: сопоставлено ${m}${un ? `, не сопоставлено: ${un}` : ''}` }); }
+    });
+    UI.upl = res; save(); setTimeout(() => { if (UI.tab === 'reports') render(); toast(res.some(r => r.ok) ? 'Отчёт загружен, остатки из файлов обновлены' : 'Файлы не распознаны', res.some(r => r.ok) ? 'ok' : 'warn'); }, 220);
+  }, 900);
+}
+
+/* ---------- Drawer товара ---------- */
+function openDrawer(pid) {
+  const P = PBY[pid]; if (!P) return; const g = groupSummary(P, allWh), [sc, sl] = statusOf(g.turn), fav = S.favs.includes(pid);
+  const dates = []; for (let i = DAYS - 60; i < DAYS; i++) dates.push(dayDate(i));
+  const ser = mp => P[mp] ? P[mp].series.orders_amount.slice(DAYS - 60) : new Array(60).fill(0);
+  const o30 = groupMetric([P], 'orders_amount', DAYS - 30, DAYS - 1), r30 = groupMetric([P], 'orders_sum', DAYS - 30, DAYS - 1), r30p = groupMetric([P], 'orders_sum', DAYS - 60, DAYS - 31);
+  const whs = mp => P[mp] ? `<div class="dr-s">${mpBadge(mp)}склады · все (${allWh(P, mp).length})</div><div class="tw"><table class="wh"><thead><tr><th>Склад</th><th>Остаток</th><th>Оборот</th><th>К заказу</th></tr></thead><tbody>${allWh(P, mp).sort((a, b) => (turnDays(a) ?? 1e9) - (turnDays(b) ?? 1e9)).map(w => { const r = recOrder(w, mp); return `<tr><td>${esc(w.name)}</td><td class="n">${w.stock} шт.</td><td>${turnPill(turnDays(w))}</td><td>${r ? `<span class="order-flag">${r} шт.</span>` : '—'}</td></tr>`; }).join('')}</tbody></table></div>` : '';
+  $('#drawer').innerHTML = `<button class="btn icon dr-x" data-act="close" aria-label="Закрыть">${ic('x')}</button>
+  <div>${P.wb ? mpBadge('wb') : ''}${P.ozon ? mpBadge('ozon') : ''}<span class="pill ${sc}" style="margin-left:2px">${sl}</span></div>
+  <h3 class="dr-t" style="margin-top:10px">${esc(P.article)}</h3><div class="pc-sub">${esc(P.name)} · ${money(P.price)}</div>
+  <div class="dr-g"><div><div class="l">Остаток</div><div class="v">${fmt(g.stock)} шт.</div></div><div><div class="l">Оборот</div><div class="v">${g.turn != null ? fmt(g.turn, 1) + ' дн.' : '—'}</div></div><div><div class="l">Хватит до</div><div class="v">${g.runwayDate ? (g.turn > 300 ? '> года' : dShort(g.runwayDate)) : '—'}</div></div>
+  <div><div class="l">Заказы, 30 дн.</div><div class="v">${fmt(o30)} шт.</div></div><div><div class="l">Выручка, 30 дн.</div><div class="v">${compactMoney(r30)}</div></div><div><div class="l">К заказу</div><div class="v" style="color:var(--warn)">${fmt(g.rec)} шт.</div></div></div>
+  <div class="row" style="flex-wrap:wrap;margin-bottom:6px"><button class="star ${fav ? 'on' : ''}" data-act="fav-toggle" data-pid="${pid}" data-keep="1">${ic('star')}${fav ? 'В избранном' : 'В избранное'}</button><span class="chip">Выручка к пред. 30 дн. ${deltaHtml(r30, r30p, null, true)}</span></div>
+  <div class="dr-s">Заказы по дням · 60 дней</div>
+  ${chart('dr-ch', { type: 'bars', stacked: true, ticks: 5, h: 220, labels: dates, series: [{ name: 'WB', color: hexCol.wb, data: ser('wb') }, { name: 'Ozon', color: hexCol.ozon, data: ser('ozon') }], tipFmt: v => fmt(v) + ' шт.', title: 'Заказы по дням' })}
+  ${whs('wb')}${whs('ozon')}`;
+  openLayer($('#drawer')); initCharts($('#drawer')); $('#drawer').scrollTop = 0;
+}
+
+function openAbout() {
+  $('#about').innerHTML = `<button class="btn icon dr-x" style="position:absolute" data-act="close" aria-label="Закрыть">${ic('x')}</button>
+  <div class="logo" style="margin-bottom:14px">${LOGO}</div><h3 class="ab-h">Трекер остатков · Ozon &amp; Wildberries</h3>
+  <p class="lead" style="margin:0">Дашборд для селлера: остатки по складам двух маркетплейсов, оборачиваемость, рекомендации к заказу и Telegram-алерты в одном окне. Эта страница работает полностью в браузере на сгенерированных данных, магазин и товары вымышлены.</p>
+  <div class="ab-g"><div><b>Остатки и оборот</b>WB, Ozon и WB-FBS в одной карточке артикула, расчёт «хватит до» и «к заказу»</div><div><b>Гибкие метрики</b>Сравнение периода с предыдущим по выбранным показателям воронки и рекламы</div><div><b>Алерты в Telegram</b>Сводка по расписанию, рост заказов внутри дня, нехватка на подскладах</div><div><b>План поставок</b>Разбивка по складам, ETA, выгрузка в CSV</div><div><b>Отчёты из ЛК</b>Загрузка xlsx-выгрузок Ozon и WB с автоопределением типа</div><div><b>Живой расчёт</b>Цикл и плечо доставки пересчитывают рекомендации мгновенно</div></div>
+  <div class="count-note" style="margin-bottom:6px">Оригинальный проект</div><div class="ab-tech">${['Node.js', 'Express', 'SQLite', 'cron', 'Telegram Bot API', 'API аналитики', 'Docker', 'nginx', 'xlsx'].map(t => `<span class="chip">${t}</span>`).join('')}</div>
+  <div class="count-note" style="margin:14px 0 6px">Эта демо-версия</div><div class="ab-tech">${['HTML', 'CSS', 'Vanilla JS', 'SVG-графики', 'localStorage'].map(t => `<span class="chip">${t}</span>`).join('')}</div>
+  <div style="margin-top:20px"><span class="chip">Ctrl+K · быстрый поиск и переходы</span></div>`;
+  closeLayers(); openLayer($('#about'));
+}
+
+/* ---------- Ядро: рендер, роутинг, действия ---------- */
+const LOGO = '<svg viewBox="0 0 24 24"><path d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9" opacity=".7"/></svg>';
+const VIEWS = { overview: renderOverview, favorites: renderFavorites, products: renderProducts, plan: renderPlan, metrics: renderMetrics, alerts: renderAlerts, reports: renderReports };
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(t => `<button class="${t.id === UI.tab ? 'active' : ''}" data-act="go" data-tab="${t.id}" aria-current="${t.id === UI.tab ? 'page' : 'false'}">${ic(t.icon)}${t.label}${t.cnt ? `<span class="cnt">${t.cnt()}</span>` : ''}</button>`).join('');
+}
+function render(keepScroll = true) {
+  const y = window.scrollY, v = $('#view'); v.innerHTML = VIEWS[UI.tab](); renderTabs();
+  v.classList.remove('view'); void v.offsetWidth; if (!keepScroll || UI._fresh) v.classList.add('view');
+  UI._fresh = false; initCharts(v); animateCounts(v); window.scrollTo(0, keepScroll ? y : 0);
+}
+function go(tab) { if (!VIEWS[tab]) tab = 'overview'; UI.tab = tab; UI._fresh = true; toggleSettings(false); try { history.replaceState(null, '', '#' + tab); } catch (e) { } render(false); }
+function toggleTheme() { S.theme = S.theme === 'dark' ? 'light' : 'dark'; applyTheme(); save(); render(); }
+function applyTheme() { document.documentElement.dataset.theme = S.theme; $('#themeBtn').innerHTML = ic(S.theme === 'dark' ? 'sun' : 'moon'); }
+function toggleSettings(force) {
+  const pop = $('#settingsPop'), on = force ?? !pop.classList.contains('on'); pop.classList.toggle('on', on);
+  if (on) { $('#s-planning').value = S.settings.planning_days; $('#s-wb').value = S.settings.lead_time_wb; $('#s-oz').value = S.settings.lead_time_ozon; }
+}
+function syncLabel() {
+  const m = Math.round((Date.now() - UI.lastSync) / 60000);
+  $('#syncInfo').innerHTML = UI.syncing ? '<b>Обновляется…</b>авто каждые 15 мин' : `<b>${nowHmOf(UI.lastSync)}</b>${m < 1 ? 'только что' : m + ' мин назад'} · авто 15 мин`;
+}
+const nowHmOf = t => new Date(t).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+function doSync() {
+  if (UI.syncing) return; UI.syncing = true; const b = $('#syncBtn'); b.classList.add('spin'); b.disabled = true; $('.tx-hide', b).textContent = 'Обновляю…'; syncLabel();
+  setTimeout(() => {
+    PRODUCTS.forEach(p => ['wb', 'ozon'].forEach(mp => p[mp] && Object.values(p[mp].wh).forEach(w => { w.stock = Math.max(0, Math.round(w.stock - w.ds * (.15 + Math.random() * .4) + (Math.random() < .04 ? w.ds * 12 : 0))); })));
+    UI.lastSync = Date.now(); UI.syncing = false; b.classList.remove('spin'); b.disabled = false; $('.tx-hide', b).textContent = 'Обновить'; syncLabel(); render(); toast('Остатки обновлены, кэш метрик пересчитан');
+  }, 1500);
+}
+async function copyText(t) { try { await navigator.clipboard.writeText(t); return true; } catch (e) { try { const a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = 0; document.body.appendChild(a); a.select(); const ok = document.execCommand('copy'); a.remove(); return ok; } catch (e2) { return false; } } }
+function setFav(pid, on) { const has = S.favs.includes(pid); if (on && !has) S.favs.push(pid); if (!on && has) S.favs = S.favs.filter(x => x !== pid); save(); }
+
+const ACT = {
+  go: el => go(el.dataset.tab),
+  close: () => closeLayers(),
+  drawer: el => openDrawer(+el.dataset.pid),
+  'ov-period': el => { S.ovPeriod = +el.dataset.n; save(); render(); },
+  period: el => { S.period = +el.dataset.n; save(); render(); },
+  sec: el => { const id = el.dataset.id; const on = !UI.open.has(id); on ? UI.open.add(id) : UI.open.delete(id); el.classList.toggle('open', on); const b = el.nextElementSibling; if (b) b.classList.toggle('open', on); },
+  picker: el => { const id = el.dataset.id; const on = !UI.pk.has(id); on ? UI.pk.add(id) : UI.pk.delete(id); $('#pk-' + id).classList.toggle('open', on); },
+  'wh-add': el => { const ids = $$('input:checked', $('#pk-' + el.dataset.id)).map(c => +c.value); if (!ids.length) return; const s = S.sel[el.dataset.pid][el.dataset.mp]; ids.forEach(i => s.includes(i) || s.push(i)); save(); render(); toast(`Добавлено ${ids.length} ${plural(ids.length, 'склад', 'склада', 'складов')}`); },
+  'wh-del': el => { const s = S.sel[el.dataset.pid][el.dataset.mp]; S.sel[el.dataset.pid][el.dataset.mp] = s.filter(i => i !== +el.dataset.w); save(); render(); },
+  'fav-toggle': el => { const pid = +el.dataset.pid, on = !S.favs.includes(pid); setFav(pid, on); if (el.dataset.keep) { openDrawer(pid); } if (UI.tab === 'products') { const y = scrollY; $('#plist').innerHTML = productRows(); } else render(); renderTabs(); if (on) toast(`${PBY[pid].article} добавлен в избранное`); },
+  mg: el => { const g = el.dataset.g; UI.mg.has(g) ? UI.mg.delete(g) : UI.mg.add(g); el.parentElement.classList.toggle('open'); },
+  'pf-flt': el => { UI.pf.flt = el.dataset.k; $$('#pfl button').forEach(b => b.classList.toggle('on', b === el)); $('#plist').innerHTML = productRows(); },
+  'pf-sort': el => { UI.pf.sort = el.dataset.k; $$('#psr button').forEach(b => b.classList.toggle('on', b === el)); $('#plist').innerHTML = productRows(); },
+  'plan-scope': el => { UI.plan.scope = el.dataset.k; render(); }, 'plan-mp': el => { UI.plan.mp = el.dataset.k; render(); },
+  'plan-all': el => { if (el.dataset.on === '1') UI.plan.off.clear(); else planGroups().forEach(g => g.rows.forEach(r => UI.plan.off.add(r.key))); render(); },
+  'plan-copy': async () => { toast(await copyText(planText()) ? 'План скопирован в буфер обмена' : 'Не удалось скопировать', 'ok'); },
+  'plan-csv': () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([planCsv()], { type: 'text/csv;charset=utf-8' })); a.download = 'plan-postavok.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); toast('CSV сформирован'); },
+  'alert-seg': el => { UI.alert = el.dataset.k; UI.tpick = null; UI.bad = []; UI.attempt = null; $$('#aseg button').forEach(b => b.classList.toggle('on', b === el)); $('#alertBody').innerHTML = alertBody(); },
+  'tok-eye': () => { UI.tok = !UI.tok; const i = $('#tokIn'); i.type = UI.tok ? 'text' : 'password'; i.value = UI.tok ? 'demo:AAH_fake_token_for_portfolio_only' : S.bot.masked; },
+  'tok-save': () => { const n = $('#tokNote'); n.style.color = 'var(--dim)'; n.textContent = 'Проверяю…'; setTimeout(() => { n.style.color = 'var(--ok)'; n.textContent = `✓ Подключено как @${S.bot.username}`; $('#botSt').textContent = `● @${S.bot.username}`; }, 600); },
+  'chat-add': () => { const i = $('#chatIn'), v = i.value.trim(); if (!/^-?\d{5,15}$/.test(v)) { toast('chat_id: только цифры, 5–15 знаков', 'warn'); return; } if (S.bot.chats.includes(v)) { toast('Такой получатель уже есть', 'warn'); return; } S.bot.chats.push(v); save(); const keep = UI.alert; render(); },
+  'chat-del': el => { S.bot.chats = S.bot.chats.filter(c => c !== el.dataset.id); save(); render(); },
+  'alert-test': el => {
+    const t = el.dataset.t, note = $('#tn-' + t); if (!S.bot.chats.length) { note.style.color = 'var(--warn)'; note.textContent = 'Добавьте хотя бы одного получателя'; return; }
+    note.style.color = 'var(--dim)'; note.textContent = 'Отправляю…';
+    setTimeout(() => {
+      const html = t === 'daily' ? buildDaily() : t === 'intraday' ? (buildIntraday() || '<b>⚡ Резкий рост заказов</b>\n\nТестовое сообщение: сейчас роста выше порога нет.') : buildFbs().msg;
+      if (!html) { note.style.color = 'var(--warn)'; note.textContent = 'Нечего отправлять: избранное пустое или всё выключено'; return; }
+      UI.sent[t].push({ html, t: nowHm() }); if (UI.sent[t].length > 3) UI.sent[t].shift(); refreshPreview();
+      const box = $('#tgMsgs-' + t); if (box) box.scrollTop = box.scrollHeight;
+      note.style.color = 'var(--ok)'; note.textContent = `✓ Отправлено (${S.bot.chats.length} ${plural(S.bot.chats.length, 'получателю', 'получателям', 'получателям')})`; toast('Тестовый алерт доставлен (демо)');
+    }, 650);
+  },
+  'tc-open': el => { UI.tpick = UI.tpick === el.dataset.key ? null : el.dataset.key; $('#alertBody').innerHTML = alertBody(); },
+  'tc-del': el => { const a = S.alerts.intraday; applyIntraTimes(a.times.filter(t => t !== el.dataset.t)); },
+  'tc-ok': el => { const key = el.dataset.key, v = $('#tp-' + key).value; if (!v) return; UI.tpick = null;
+    if (key === 'daily') { S.alerts.daily.time = v; save(); $('#alertBody').innerHTML = alertBody(); noteSaved(); }
+    else if (key === 'fbs') { S.alerts.fbs.time = v; save(); $('#alertBody').innerHTML = alertBody(); noteSaved(); }
+    else applyIntraTimes([...S.alerts.intraday.times, v]); },
+  'pick-file': () => $('#fileIn').click(),
+  'demo-upload': el => { const mp = el.dataset.mp; processFiles([{ name: mp === 'ozon' ? 'Доступность товаров_demo.xlsx' : 'supplier-goods-demo-week.xlsx' }]); },
+  'cmd-run': el => runCmd(+el.dataset.i),
+  'open-cmd': () => openCmd(), 'open-about': () => openAbout(), 'theme': () => toggleTheme(), 'sync': () => doSync(), 'settings': () => toggleSettings(), 'reset': () => resetDemo(),
+  'save-settings': () => { toggleSettings(false); toast('Параметры сохранены, рекомендации пересчитаны'); },
+};
+function applyIntraTimes(times) {
+  const v = validateTimes(times);
+  if (v.err) { UI.bad = v.bad; UI.attempt = times; UI.tpick = null; $('#alertBody').innerHTML = alertBody(); $('#tErr').textContent = v.err; return; }
+  UI.bad = []; UI.attempt = null; S.alerts.intraday.times = v.sorted; save(); $('#alertBody').innerHTML = alertBody(); noteSaved();
+}
+const numOr = (v, d, mn = 1, mx = 365) => { const n = Math.round(+v); return isNaN(n) ? d : clamp(n, mn, mx); };
+const CH = {
+  'metric-card': () => { S.metrics = METRICS.map(m => m.key).filter(k => $(`[data-ch="metric-card"][data-key="${k}"]`)?.checked); save(); noteSaved(); const pv = PBY[UI.pv] && S.favs.includes(UI.pv) ? PBY[UI.pv] : PBY[S.favs[0]]; if (pv) $('#pvBox').innerHTML = pcard(pv, { preview: true }); },
+  'pv-sel': el => { UI.pv = +el.value; $('#pvBox').innerHTML = pcard(PBY[UI.pv], { preview: true }); },
+  'daily-metric': () => { S.alerts.daily.metrics = METRICS.map(m => m.key).filter(k => $(`[data-ch="daily-metric"][data-key="${k}"]`)?.checked); save(); noteSaved(); refreshPreview(); },
+  'daily-en': el => { S.alerts.daily.enabled = el.checked; save(); noteSaved(); },
+  'daily-stock': el => { S.alerts.daily.stock = el.checked; save(); $('#alertBody').innerHTML = alertBody(); noteSaved(); },
+  'daily-det': el => { S.alerts.daily.details = el.checked; save(); noteSaved(); refreshPreview(); },
+  'daily-reg': el => { S.alerts.daily.regions = el.checked; save(); noteSaved(); refreshPreview(); },
+  'intr-en': el => { S.alerts.intraday.enabled = el.checked; save(); noteSaved(); },
+  'intr-thr': el => { const v = numOr(el.value, 5, 1, 99); el.value = v; S.alerts.intraday.threshold = v; save(); noteSaved(); refreshPreview(); },
+  'intr-wb': () => chanChange(), 'intr-oz': () => chanChange(),
+  'fbs-en': el => { S.alerts.fbs.enabled = el.checked; save(); noteSaved(); },
+  'fbs-main': el => { S.alerts.fbs.main = +el.value; save(); noteSaved(); refreshPreview(); },
+  'fbs-def': el => { const v = numOr(el.value, 10, 1, 999); S.alerts.fbs.def = v; save(); $('#alertBody').innerHTML = alertBody(); noteSaved(); },
+  'fbs-p-en': el => { fbsProd(+el.dataset.pid).enabled = el.checked; save(); $('#alertBody').innerHTML = alertBody(); noteSaved(); },
+  'fbs-p-thr': el => { fbsProd(+el.dataset.pid).threshold = el.value === '' ? null : numOr(el.value, 10, 1, 999); save(); $('#alertBody').innerHTML = alertBody(); noteSaved(); },
+  'fbs-w-thr': el => { fbsProd(+el.dataset.pid).wh[el.dataset.w] = el.value === '' ? undefined : numOr(el.value, 10, 1, 999); if (el.value === '') delete fbsProd(+el.dataset.pid).wh[el.dataset.w]; save(); refreshPreview(); noteSaved(); },
+  'plan-chk': el => { el.checked ? UI.plan.off.delete(el.dataset.key) : UI.plan.off.add(el.dataset.key); render(); },
+};
+function chanChange() { const ch = []; if ($('[data-ch="intr-wb"]').checked) ch.push('wb'); if ($('[data-ch="intr-oz"]').checked) ch.push('ozon'); if (!ch.length) { $('[data-ch="intr-wb"]').checked = true; ch.push('wb'); } S.alerts.intraday.channels = ch; save(); noteSaved(); refreshPreview(); }
+const IN = {
+  'pf-q': el => { UI.pf.q = el.value; $('#plist').innerHTML = productRows(); },
+  's-planning': el => { S.settings.planning_days = numOr(el.value, 30, 1, 180); save(); settingsChanged(); },
+  's-wb': el => { S.settings.lead_time_wb = numOr(el.value, 12, 0, 120); save(); settingsChanged(); },
+  's-oz': el => { S.settings.lead_time_ozon = numOr(el.value, 18, 0, 120); save(); settingsChanged(); },
+};
+let stT; function settingsChanged() { clearTimeout(stT); stT = setTimeout(() => { $('#setNote').textContent = '✓ Применено'; render(); setTimeout(() => { const n = $('#setNote'); if (n) n.textContent = ''; }, 1200); }, 220); }
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (el && ACT[el.dataset.act]) { if (el.tagName === 'A') e.preventDefault(); ACT[el.dataset.act](el, e); return; }
+  if (!e.target.closest('#settingsPop') && !e.target.closest('#setBtn')) $('#settingsPop').classList.remove('on');
+});
+document.addEventListener('change', e => { const el = e.target.closest('[data-ch]'); if (el && CH[el.dataset.ch]) CH[el.dataset.ch](el); if (e.target.id === 'fileIn') { const f = Array.from(e.target.files || []); if (f.length) processFiles(f); e.target.value = ''; } });
+document.addEventListener('input', e => { const el = e.target.closest('[data-in]'); if (el && IN[el.dataset.in]) IN[el.dataset.in](el); if (e.target.id === 'cmdIn') { CMD.sel = 0; renderCmd(); } });
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); $('#cmd').classList.contains('on') ? closeLayers() : openCmd(); return; }
+  if (e.key === 'Escape') { closeLayers(); toggleSettings(false); return; }
+  if ($('#cmd').classList.contains('on')) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); CMD.sel = Math.min(CMD.items.length - 1, CMD.sel + 1); renderCmd(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); CMD.sel = Math.max(0, CMD.sel - 1); renderCmd(); }
+    else if (e.key === 'Enter') { e.preventDefault(); runCmd(CMD.sel); }
+  } else if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop') { e.preventDefault(); $('#fileIn').click(); }
+  if (e.key === 'Enter' && e.target.id === 'chatIn') ACT['chat-add']();
+});
+document.addEventListener('dragover', e => { const d = e.target.closest && e.target.closest('#drop'); if (d) { e.preventDefault(); d.classList.add('over'); } });
+document.addEventListener('dragleave', e => { const d = e.target.closest && e.target.closest('#drop'); if (d) d.classList.remove('over'); });
+document.addEventListener('drop', e => { const d = e.target.closest && e.target.closest('#drop'); if (d) { e.preventDefault(); d.classList.remove('over'); const f = Array.from(e.dataTransfer.files || []); if (f.length) processFiles(f); } });
+
+/* ---------- Старт ---------- */
+(function boot() {
+  $('#logo').innerHTML = LOGO; applyTheme();
+  const h = (location.hash || '').slice(1); if (VIEWS[h]) UI.tab = h;
+  window.addEventListener('hashchange', () => { const x = location.hash.slice(1); if (VIEWS[x] && x !== UI.tab) go(x); });
+  UI._fresh = true; render(false); syncLabel(); setInterval(syncLabel, 30000);
+})();
+</script>
+</body>
+</html>

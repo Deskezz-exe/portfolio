@@ -54,4 +54,14 @@ window.PROJECTS = [
     stack: ['Node.js', 'Redis', 'PocketBase', 'n8n', 'OpenRouter API', 'JavaScript', 'HTML', 'CSS'],
     demo: 'projects/vesper/',
   },
+  {
+    title: 'Трекер остатков',
+    type: 'Аналитика для селлера',
+    category: 'Автоматизация',
+    description: 'Панель для продавца на Ozon и Wildberries: заказы и остатки по складам, динамика продаж, оборачиваемость, товары под риском, избранные артикулы со своими метриками, план поставок, Telegram-алерты и загрузка отчётов из кабинетов. Данные в демо вымышленные.',
+    image: 'assets/stock-tracker.jpg',
+    status: 'demo',
+    stack: ['JavaScript', 'HTML', 'CSS', 'Ozon', 'Wildberries'],
+    demo: 'projects/stock-tracker/',
+  },
 ];
